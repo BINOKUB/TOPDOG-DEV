@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="./icon-dog-192.png">
     <link rel="apple-touch-icon" href="./icon-dog-192.png">
     
-    <link rel="stylesheet" href="style.css?v=25"> 
+    <link rel="stylesheet" href="style.css?v=FINAL"> 
 
     <link id="skin-stylesheet" rel="stylesheet" href="">
     
@@ -44,24 +44,6 @@
         }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
-
-    <script>
-        (function() {
-            const activeBg = localStorage.getItem('topdog_active_bg');
-            const link = document.getElementById('skin-stylesheet');
-            
-            const skinMap = {
-                'bg_night': 'skin-neon.css',
-                'bg_cyber': 'skin-cyber.css',
-                'bg_gold': 'skin-gold.css',
-                'bg_diamond': 'skin-diamond.css'
-            };
-
-            if (activeBg && skinMap[activeBg]) {
-                link.href = skinMap[activeBg];
-            }
-        })();
-    </script>
 </head>
 <body>
 
@@ -120,57 +102,25 @@
         }
     </script>
 
+    <script src="catalog.js?v=FINAL"></script>
+    <script src="cosmetics.js?v=FINAL"></script>
 
-<script src="catalog.js?v=2"></script>
-    <script src="cosmetics.js?v=1"></script>
-
-    <script src="logic.js?v=999"></script>
-    <script src="ui.js?v=FORCE_RESET"></script>
+    <script src="logic.js?v=FINAL"></script>
+    <script src="ui.js?v=FINAL"></script>
 
     <script>
         window.addEventListener('load', function() {
             console.log("🚀 Lancement du système TopDog...");
 
-            // 1. On applique les cosmétiques (Skin + Chien)
+            // On applique le look (Skin + Chien) immédiatement
+            // pour que ce soit beau même derrière l'écran titre
             if(typeof Cosmetics !== 'undefined') {
                 Cosmetics.init();
-            }
-
-            // 2. ON DÉMARRE LE JEU !
-            if(typeof startGame === 'function') {
-                startGame();
             } else {
-                console.error("❌ ERREUR CRITIQUE : La fonction startGame() est introuvable. Vérifie ui.js !");
+                console.error("❌ ERREUR : cosmetics.js non chargé !");
             }
         });
     </script>
 
-    
-    <script>
-        window.onfocus = function() {
-            // 1. Vérifie l'argent
-            if(typeof gameState !== 'undefined' && typeof updateHUD === 'function') {
-                const savedMoney = parseInt(localStorage.getItem('topdog_wallet')) || 0;
-                
-                // Si l'affichage est différent de la mémoire, on corrige !
-                if(savedMoney !== gameState.bankroll) {
-                    console.log("💰 Synchro : " + savedMoney + " $");
-                    gameState.bankroll = savedMoney;
-                    updateHUD(); 
-                }
-            }
-            
-            // 2. Vérifie le skin (si tu viens d'acheter Néon City)
-            const activeBg = localStorage.getItem('topdog_active_bg');
-            const link = document.getElementById('skin-stylesheet');
-            const skinMap = { 'bg_night': 'skin-neon.css', 'bg_cyber': 'skin-cyber.css', 'bg_gold': 'skin-gold.css', 'bg_diamond': 'skin-diamond.css' };
-            
-            if (activeBg && skinMap[activeBg] && link.href !== skinMap[activeBg]) {
-                link.href = skinMap[activeBg]; // Change le look instantanément
-            }
-        };
-    </script>
-    
-    
 </body>
 </html>
