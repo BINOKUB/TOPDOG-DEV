@@ -1,4 +1,4 @@
-/* SKIN DIAMANT PUR (V2 - FIX VISUEL) */
+/* SKIN DIAMANT PUR (V3 - FIX VISIBILITÉ CHRONO) */
 :root {
     --cyan: #00e5ff;
 }
@@ -6,14 +6,23 @@
 /* 1. FOND DE LUXE (Clair et Brillant) */
 body {
     background: radial-gradient(circle at center, #f0faff, #d7efff, #a7cbf2) !important;
-    color: #003366 !important; /* Texte bleu très foncé */
+    color: #003366 !important;
 }
 
-/* 2. HUD (Adapté au fond clair) */
-.hud-label { color: #546e7a !important; font-weight:bold; }
-.hud-value { color: #01579b !important; text-shadow: none !important; }
-.skin-text { color: #00bcd4 !important; text-shadow: 0 0 5px #a7cbf2; }
-#timer-container { color: #000 !important; }
+/* 2. HUD (C'EST ICI LA CORRECTION) */
+/* Les titres (Temps, Banque...) */
+.hud-label { 
+    color: #546e7a !important; 
+    font-weight: 800 !important; 
+}
+
+/* Les valeurs (Le Chrono, L'argent...) */
+/* On force le Bleu Foncé (#002f6c) pour que ce soit lisible sur le blanc */
+.hud-value, #timer-container, #score-display, #reserve-count { 
+    color: #002f6c !important; 
+    text-shadow: none !important; 
+    font-weight: 900 !important;
+}
 
 /* 3. GRILLE EN VERRE TAILLÉ */
 #game-grid {
@@ -26,16 +35,14 @@ body {
 
 /* 4. TUILES (Cristal) */
 .tile {
-    /* Dégradé subtil style diamant */
     background: linear-gradient(135deg, #ffffff 0%, #e1f5fe 100%) !important;
     border: 1px solid #fff !important;
     
-    /* TEXTE BLEU PROFOND (Contraste parfait) */
+    /* Chiffres en Bleu Profond */
     color: #002f6c !important; 
     font-weight: 900 !important;
     font-family: 'Segoe UI', sans-serif !important;
     
-    /* Effet de relief brillant */
     box-shadow: inset 2px 2px 5px rgba(255,255,255,1), 2px 2px 5px rgba(0,0,0,0.1);
     text-shadow: none !important;
 }
@@ -49,52 +56,34 @@ body {
 
 /* CHIFFRES EN COULEUR PRÉCIEUSE */
 .val-1, .val-2, .val-3, .val-4, .val-5, .val-6, .val-7, .val-8 {
-    color: #002f6c !important; /* Bleu Saphir foncé */
+    color: #002f6c !important; 
 }
 
-/* 5. LE CHIEN (Le Retour !) */
+/* 5. LE CHIEN (Fond Turquoise) */
+/* Note : Cosmetics.js gère l'emoji, ici on gère juste le cadre */
 .tile.nine {
-    background: radial-gradient(circle, #80deea, #00acc1) !important; /* Fond Turquoise */
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden !important;
-    padding: 0 !important;
-    
-    /* Lueur divine */
-    box-shadow: 0 0 25px #00e5ff;
+    background: radial-gradient(circle, #80deea, #00acc1) !important;
     border: 2px solid #fff !important;
+    box-shadow: 0 0 25px #00e5ff;
 }
 
-/* L'EMOJI */
-.tile.nine::before {
-    content: '💎'; /* EMOJI DIAMANT À LA PLACE DU CHIEN POUR CE SKIN ? OU CHIEN ? */
-    /* On va garder le chien pour le gameplay, ou tu peux mettre '🐶' si tu préfères */
-    content: '🐶'; 
-    font-size: 1.6em !important;
-    line-height: 1 !important;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-}
-
-/* 6. BADGE NUMÉRO DU CHIEN */
-.dog-id-badge {
-    background: #fff !important;
-    color: #00acc1 !important;
-    border: 1px solid #00acc1 !important;
-    font-weight: 900 !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* BOUTONS STYLE IOS */
+/* 6. BOUTONS ET TEXTES */
 .btn-circle {
     background: #fff !important;
     color: #00bcd4 !important;
     border: none !important;
     box-shadow: 0 5px 15px rgba(0,188,212, 0.3);
 }
+
 .top-bar h1 {
     background: -webkit-linear-gradient(#00bcd4, #006064);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+}
+
+.dog-badge {
+    background: #fff !important;
+    color: #00acc1 !important;
+    border: 1px solid #00acc1 !important;
 }
