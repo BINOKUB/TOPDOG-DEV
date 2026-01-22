@@ -437,3 +437,27 @@ function startTimer() {
 }
 
 startGame();
+<script>
+        window.onfocus = function() {
+            // Vérifie si le moteur du jeu est chargé
+            if(typeof gameState !== 'undefined' && typeof updateHUD === 'function') {
+                // Lit la vraie valeur sur le disque
+                const savedMoney = parseInt(localStorage.getItem('topdog_wallet')) || 0;
+                
+                // Si différence, on met à jour !
+                if(savedMoney !== gameState.bankroll) {
+                    console.log("💰 Synchro détectée : " + gameState.bankroll + " $ -> " + savedMoney + " $");
+                    gameState.bankroll = savedMoney;
+                    updateHUD(); // Met à jour l'affichage
+                }
+            }
+            
+            // On en profite pour re-vérifier le skin au cas où on vient de l'acheter
+            const activeBg = localStorage.getItem('topdog_active_bg');
+            const link = document.getElementById('skin-stylesheet');
+            const skinMap = { 'bg_night': 'skin-neon.css', 'bg_cyber': 'skin-cyber.css', 'bg_gold': 'skin-gold.css', 'bg_diamond': 'skin-diamond.css' };
+            if (activeBg && skinMap[activeBg] && link.href !== skinMap[activeBg]) {
+                link.href = skinMap[activeBg]; // Change le skin à la volée
+            }
+        };
+    </script>
