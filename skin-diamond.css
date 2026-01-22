@@ -1,0 +1,36 @@
+/* MODE DIAMANT (THÈME CLAIR) */
+:root {
+    --cyan: #0072ff; 
+    --bg: #fff;
+}
+
+body {
+    background: linear-gradient(to right, #e0eafc, #cfdef3) !important;
+    color: #333 !important;
+}
+
+.skin-text { 
+    color: #0072ff !important; 
+}
+
+.logo-title {
+    -webkit-text-fill-color: #333 !important;
+    background: none !important;
+}
+
+/* Grille style verre */
+.tile { 
+    background: rgba(255,255,255,0.8) !important; 
+    border: 1px solid #ccc !important; 
+    color: #000 !important; 
+}
+
+.tile.empty { 
+    background: rgba(255,255,255,0.3) !important; 
+}
+
+h1 { 
+    text-shadow: none !important; 
+    color: #333 !important; 
+    -webkit-text-fill-color: #333 !important; 
+}
