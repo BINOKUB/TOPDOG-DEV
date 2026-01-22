@@ -1,1 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TOPDOG - BOUTIQUE ÉLITE</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --cyan: #00f3ff;
+            --orange: #e67e22;
+            --purple: #9b59b6;
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
 
+        body {
+            margin: 0; padding: 20px;
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+        }
+
+        /* HEADER */
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 1px solid #333; margin-bottom: 30px;
+        }
+        .wallet-box {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--green);
+            padding: 10px 20px; border-radius: 50px;
+            color: var(--green); font-weight: bold; font-family: monospace; font-size: 1.2em;
+        }
+        .btn-back {
+            text-decoration: none; color: #888; font-weight: bold;
+            border: 1px solid #444; padding: 8px 15px; border-radius: 20px;
+        }
+
+        /* GRILLE DES ARTICLES */
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1000px; margin: 0 auto;
+        }
+
+        .item-card {
+            background: var(--glass);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.2s;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .item-card:hover { border-color: var(--cyan); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+
+        .item-icon { font-size: 4em; margin-bottom: 10px; }
+        .item-name { font-weight: bold; margin-bottom: 5px; font-size: 1.2em; color:var(--cyan); }
+        .item-desc { color: #888; font-size: 0.9em; margin-bottom: 20px; min-height: 40px; }
+        
+        /* BOUTON ACHETER / EQUIPER */
+        .btn-action {
+            width: 100%; padding: 12px 0; border: none; border-radius: 8px;
+            font-weight: bold; cursor: pointer; transition: 0.2s;
+            font-size: 1em;
+        }
+        
+        /* ÉTATS DU BOUTON */
+        .btn-buy { background: var(--orange); color: #fff; }
+        .btn-buy:active { transform: scale(0.95); }
+        
+        .btn-equip { background: var(--cyan); color: #000; }
+        
+        .btn-active { background: #444; color: #aaa; cursor: default; } /* Déjà équipé */
+        
+        .btn-locked { background: #222; color: #555; cursor: not-allowed; border:1px solid #333; } /* Pas assez d'argent */
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="btn-back">← RETOUR</a>
+        <h1>BOUTIQUE ÉLITE</h1>
+        <div class="wallet-box" id="wallet-display">0 $</div>
+    </header>
+
+    <div class="store-grid" id="store-container">
+        </div>
+
+    <script>
+        /* --- CATALOGUE DES ARTICLES (PRIX MILLIONNAIRES) --- */
+        const CATALOG = [
+            { id: 'bg_default', name: 'Original Dark', icon: '⚫', price: 0, desc: 'L\'ambiance classique du TopDog.' },
+            
+            // PRIX MISE À JOUR : 1 MILLION MINIMUM
+            { id: 'bg_night', name: 'Néon City', icon: '🌃', price: 1000000, desc: 'Le premier signe de richesse. Course nocturne.' },
+            
+            { id: 'bg_cyber', name: 'Cyber Matrix', icon: '🤖', price: 10000000, desc: 'Interface futuriste pour l\'élite technologique.' },
+            
+            { id: 'bg_gold', name: 'Luxe Doré', icon: '🏆', price: 100000000, desc: 'Le statut ultime. Réservé aux milliardaires.' }
+        ];
+
+        /* --- SYSTÈME DE SAUVEGARDE --- */
+        let wallet = parseInt(localStorage.getItem('topdog_wallet')) || 0;
+        let inventory = JSON.parse(localStorage.getItem('topdog_inventory')) || ['bg_default']; 
+        let currentBg = localStorage.getItem('topdog_active_bg') || 'bg_default';
+
+        // Mise à jour affichage argent
+        function updateWalletUI() {
+            // Affiche 1.5M ou 100k formaté proprement
+            document.getElementById('wallet-display').innerText = formatBigMoney(wallet);
+        }
+
+        // Formatter spécial Millions
+        function formatBigMoney(num) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num).replace('US', '');
+        }
+
+        // Génération de la boutique
+        function renderStore() {
+            const container = document.getElementById('store-container');
+            container.innerHTML = '';
+
+            CATALOG.forEach(item => {
+                let card = document.createElement('div');
+                card.className = 'item-card';
+
+                // Logique du bouton
+                let btnHtml = '';
+                const isOwned = inventory.includes(item.id);
+                const isEquipped = currentBg === item.id;
+                const canAfford = wallet >= item.price;
+
+                if (isEquipped) {
+                    btnHtml = `<button class="btn-action btn-active">ACTIF</button>`;
+                } else if (isOwned) {
+                    btnHtml = `<button class="btn-action btn-equip" onclick="equipItem('${item.id}')">ÉQUIPER</button>`;
+                } else {
+                    if (canAfford) {
+                        btnHtml = `<button class="btn-action btn-buy" onclick="buyItem('${item.id}', ${item.price})">ACHETER ${formatBigMoney(item.price)}</button>`;
+                    } else {
+                        btnHtml = `<button class="btn-action btn-locked">🔒 ${formatBigMoney(item.price)}</button>`;
+                    }
+                }
+
+                card.innerHTML = `
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-desc">${item.desc}</div>
+                    ${btnHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* --- ACTIONS --- */
+        window.buyItem = function(id, price) {
+            if (wallet >= price) {
+                // 1. Payer
+                wallet -= price;
+                localStorage.setItem('topdog_wallet', wallet);
+                
+                // 2. Ajouter à l'inventaire
+                inventory.push(id);
+                localStorage.setItem('topdog_inventory', JSON.stringify(inventory));
+                
+                // 3. Auto-équiper
+                currentBg = id;
+                localStorage.setItem('topdog_active_bg', id);
+
+                updateWalletUI();
+                renderStore();
+            }
+        };
+
+        window.equipItem = function(id) {
+            currentBg = id;
+            localStorage.setItem('topdog_active_bg', id);
+            renderStore();
+        };
+
+        // Lancement
+        updateWalletUI();
+        renderStore();
+
+    </script>
+</body>
+</html>
