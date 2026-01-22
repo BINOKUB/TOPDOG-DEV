@@ -48,7 +48,7 @@ const CATALOG = {
         }
     ],
 
-    // 2. LES MEUTES (Emojis) - NOUVEAU !
+    // 2. LES MEUTES (Emojis)
     dogs: [
         { 
             id: 'dog_default', 
