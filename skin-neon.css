@@ -1,0 +1,33 @@
+/* MODE NÉON */
+:root {
+    --cyan: #ff00ff; /* On remplace le cyan par du MAGENTA */
+}
+
+body {
+    background: linear-gradient(135deg, #2b1055, #7597de) !important;
+}
+
+/* Le texte HUD en rose */
+.skin-text { 
+    color: #ff00ff !important; 
+    text-shadow: 0 0 10px #ff00ff; 
+}
+
+/* La Grille brillante */
+#game-grid { 
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.4); 
+    border: 1px solid rgba(255, 0, 255, 0.5);
+}
+
+.tile { 
+    border-color: rgba(255, 0, 255, 0.3) !important; 
+}
+
+/* Boutons et Titre */
+.btn-circle { 
+    border-color: #ff00ff !important; 
+    color: #ff00ff !important; 
+}
+.top-bar h1 { 
+    text-shadow: 0 0 15px #ff00ff; 
+}
