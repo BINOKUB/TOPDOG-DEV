@@ -10,6 +10,7 @@
             --cyan: #00f3ff;
             --orange: #e67e22;
             --green: #2ecc71;
+            --purple: #9b59b6;
             --glass: rgba(255, 255, 255, 0.05);
         }
 
@@ -57,32 +58,14 @@
             display: flex; flex-direction: column; gap: 20px;
         }
 
-        /* EXEMPLE DE JEU (VISUEL) */
-        .demo-row {
-            display: flex; justify-content: center; align-items: center; gap: 15px;
-            margin: 10px 0;
+        /* STATUT JOUEUR (Nouveau) */
+        .player-status {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 15px; border-radius: 10px; border: 1px solid #333;
         }
-        .mini-tile {
-            width: 50px; height: 50px;
-            background: #111; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 1.5em;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
-        .t-4 { color: #ff00ff; border: 1px solid rgba(255,0,255,0.3); }
-        .t-5 { color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
-        .plus { font-size: 1.5em; color: #555; }
-        .result { color: #fff; font-weight: bold; }
-
-        /* TEXTE EXPLICATIF */
-        p { color: #aaa; line-height: 1.6; font-size: 0.95em; margin: 0; }
-        .highlight { color: #fff; font-weight: bold; }
-
-        /* ÉTAPES */
-        .steps { display: flex; justify-content: space-between; margin-top: 10px; }
-        .step { font-size: 0.7em; color: #666; text-transform: uppercase; letter-spacing: 1px; }
-        .step span { display: block; font-size: 2.5em; margin-bottom: 5px; }
+        .rank-badge { color: var(--purple); font-weight: bold; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; }
+        .wallet-display { color: var(--green); font-family: monospace; font-size: 1.1em; }
 
         /* BOUTON D'ACTION */
         .btn-play {
@@ -97,10 +80,27 @@
         }
         .btn-play:active { transform: scale(0.96); box-shadow: 0 5px 10px rgba(230, 126, 34, 0.2); }
 
-        /* PIED DE PAGE */
-        .footer {
-            margin-top: 30px; font-size: 0.7em; color: #444; font-family: monospace;
+        /* BOUTON STORE (Nouveau) */
+        .btn-store {
+            background: transparent; color: var(--cyan); text-decoration: none;
+            padding: 12px 0; border-radius: 50px; border: 1px solid var(--cyan);
+            font-size: 0.9em; font-weight: bold; letter-spacing: 1px;
+            display: block; width: 100%; transition: 0.3s;
         }
+        .btn-store:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
+
+        .footer { margin-top: 30px; font-size: 0.7em; color: #444; font-family: monospace; }
+        
+        /* TEXTE & DEMO */
+        p { color: #aaa; line-height: 1.6; font-size: 0.95em; margin: 0; }
+        .highlight { color: #fff; font-weight: bold; }
+        .demo-row { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0; }
+        .mini-tile { width: 50px; height: 50px; background: #111; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5em; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .t-4 { color: #ff00ff; border: 1px solid rgba(255,0,255,0.3); }
+        .t-5 { color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+        .plus { font-size: 1.5em; color: #555; }
+        .result { color: #fff; font-weight: bold; }
+
     </style>
 </head>
 <body>
@@ -112,6 +112,11 @@
 
     <div class="card-container">
         
+        <div class="player-status">
+            <div class="rank-badge" id="lobby-rank">🐶 CHIOT</div>
+            <div class="wallet-display" id="lobby-wallet">0 $</div>
+        </div>
+
         <div style="text-align:center;">
             <p style="font-size:0.8em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">La Règle d'Or</p>
             <div class="demo-row">
@@ -126,24 +131,33 @@
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); width:100%;">
 
         <p>
-            Plongez dans l'arène. Misez sur vos chiens favoris et frayez-leur un chemin en éliminant les obstacles.<br><br>
+            Plongez dans l'arène. Misez sur vos chiens favoris et frayez-leur un chemin.<br><br>
             <span class="highlight">Rapidité</span> • <span class="highlight">Stratégie</span> • <span class="highlight">Cash Out</span>
         </p>
 
        <a href="topdog.html" class="btn-play">LANCER LE JEU</a>
-        
-        <a href="exemple.html" class="btn-demo" style="
-            display: block; margin-top: 15px; 
-            color: #888; text-decoration: none; 
-            font-size: 0.9em; font-weight: bold; letter-spacing: 1px;
-            border: 1px solid #333; padding: 12px 0; border-radius: 50px;
-            transition: all 0.2s;">
-            VOIR UNE DÉMO 🎥
-        </a>
+       
+       <a href="store.html" class="btn-store">🛍️ ACCÉDER À LA BOUTIQUE</a>
 
     </div>
 
-    <div class="footer">V1.0 GOLD EDITION • STUDIO CODE</div>
+    <div class="footer">V1.1 STORE EDITION • STUDIO CODE</div>
+
+    <script>
+        // Ce petit script va chercher l'argent sauvegardé
+        // Si c'est la première fois, il met 0 et "Débutant"
+        
+        const savedMoney = localStorage.getItem('topdog_wallet') || 0;
+        document.getElementById('lobby-wallet').innerText = new Intl.NumberFormat('fr-FR').format(savedMoney) + " $";
+
+        // Calcul du rang pour l'accueil
+        let rank = "🐶 CHIOT";
+        if(savedMoney > 1000) rank = "🦊 RENARD";
+        if(savedMoney > 10000) rank = "🐺 LOUP";
+        if(savedMoney > 100000) rank = "🦁 TOPDOG";
+        
+        document.getElementById('lobby-rank').innerText = rank;
+    </script>
 
 </body>
 </html>
