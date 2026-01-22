@@ -92,5 +92,43 @@
         }
     </script>
 
+<script>
+        (function applySkin() {
+            // 1. On récupère le décor actif
+            const activeBg = localStorage.getItem('topdog_active_bg') || 'bg_default';
+            const body = document.body;
+
+            // 2. On applique le style selon l'ID
+            switch(activeBg) {
+                case 'bg_night': // MODE NÉON
+                    body.style.background = "linear-gradient(135deg, #0f0c29, #302b63, #24243e)";
+                    document.documentElement.style.setProperty('--cyan', '#ff00ff'); // Change le bleu en rose néon
+                    break;
+                
+                case 'bg_cyber': // MODE MATRIX
+                    body.style.background = "#000";
+                    body.style.backgroundImage = "linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px)";
+                    body.style.backgroundSize = "20px 20px";
+                    document.documentElement.style.setProperty('--cyan', '#00ff00'); // Tout devient vert hacker
+                    break;
+
+                case 'bg_gold': // MODE MILLIARDAIRE
+                    body.style.background = "radial-gradient(circle, #44370b 0%, #1a1600 100%)";
+                    document.documentElement.style.setProperty('--cyan', '#ffd700'); // Tout devient or
+                    break;
+                
+                case 'bg_diamond': // MODE DIAMANT (1 MILLIARD)
+                    body.style.background = "linear-gradient(to right, #e0eafc, #cfdef3)";
+                    body.style.color = "#333"; // Texte foncé pour lisibilité
+                    document.documentElement.style.setProperty('--bg', '#fff'); 
+                    document.documentElement.style.setProperty('--cyan', '#0072ff');
+                    break;
+
+                default: // ORIGINAL (Rien à faire)
+                    break;
+            }
+        })();
+    </script>
+    
     <script src="logic.js?v=23"></script> <script src="ui.js?v=25"></script>    </body>
 </html>
