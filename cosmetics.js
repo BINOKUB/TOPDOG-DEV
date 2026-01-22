@@ -34,6 +34,7 @@ const Cosmetics = {
     },
 
     // Applique le Chien (Emoji)
+    // Applique le Chien (Emoji) - VERSION BLINDÉE
     applyActiveDog: function() {
         const activeId = localStorage.getItem('topdog_active_dog') || 'dog_default';
         
@@ -48,10 +49,30 @@ const Cosmetics = {
             style.id = 'dog-pack-style';
             document.head.appendChild(style);
         }
-        // Force l'emoji
-        style.innerHTML = `.tile.nine::before { content: '${emoji}' !important; }`;
+        
+        // ON FORCE L'EMOJI PAR DESSUS TOUT LE RESTE
+        // On rend la règle ultra-puissante avec !important
+        style.innerHTML = `
+            .tile.nine::before { 
+                content: '${emoji}' !important; 
+                background: none !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 1.6em !important; 
+            }
+            /* Au cas où le chien serait affiché autrement (texte), on le cache */
+            .tile.nine {
+                color: transparent !important; 
+            }
+            .tile.nine::before {
+                color: #fff !important; /* On remet la couleur du chien visible */
+                text-shadow: none !important;
+            }
+        `;
     },
-
     // Vérifie si quelque chose a changé (Synchro)
     checkSync: function() {
         this.applyActiveSkin();
