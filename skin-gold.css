@@ -1,0 +1,21 @@
+/* MODE MILLIARDAIRE */
+:root {
+    --cyan: #ffd700; /* OR */
+}
+
+body {
+    background: radial-gradient(circle, #6d5612 0%, #1a1600 100%) !important;
+}
+
+.skin-text { 
+    color: #ffd700 !important; 
+}
+
+#game-grid { 
+    border: 2px solid #ffd700; 
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.4); 
+}
+
+.tile { 
+    border: 1px solid rgba(255, 215, 0, 0.3) !important; 
+}
