@@ -127,35 +127,45 @@ document.getElementById('btn-shuffle').onclick = () => {
     }
 };
 
+/* --- FONCTION DE DÉMARRAGE ET DE RESET BLINDÉE --- */
 function startGame() {
-    // 1. FORCE BRUTE : On relit le disque dur immédiatement
-    // C'est ça qui va empêcher le retour au "750k" fantôme
-    let realMoney = localStorage.getItem('topdog_wallet');
-    
-    console.log("--- RESET DU JEU ---");
-    console.log("Argent en mémoire avant : " + (typeof gameState !== 'undefined' ? gameState.bankroll : '???'));
-    console.log("Argent réel sur le disque : " + realMoney);
+    console.log("🔄 REDÉMARRAGE DU JEU...");
 
-    // 2. On lance le moteur
+    // 1. ON VA CHERCHER L'ARGENT SUR LE DISQUE (LA VRAIE VALEUR)
+    let disqueArgent = localStorage.getItem('topdog_wallet');
+    let vraieArgent = disqueArgent ? parseInt(disqueArgent) : 0;
+    
+    console.log("💰 Argent sur le disque (Index) : " + vraieArgent);
+    
+    // 2. ON LANCE LE MOTEUR
     initGameEngine();
     
-    // 3. CORRECTION : On écrase la mémoire du jeu avec la vraie valeur du disque
-    if(realMoney !== null) {
-        gameState.bankroll = parseInt(realMoney);
+    // 3. ON FORCE LE MOTEUR À PRENDRE LA VRAIE VALEUR
+    // (Même si le moteur veut mettre 750k, on lui dit NON, tu mets 795k)
+    if(typeof gameState !== 'undefined') {
+        gameState.bankroll = vraieArgent;
+        console.log("✅ Argent forcé dans le jeu : " + gameState.bankroll);
     }
 
-    // 4. La suite normale...
+    // 4. ON MET À JOUR L'AFFICHAGE TOUT DE SUITE
+    updateHUD(); 
+
+    // 5. LE RESTE DU DÉMARRAGE CLASSIQUE
     renderBettingBoard();
-    updateHUD();
     renderGrid();
     startTimer();
     hideMessage();
     updateMuteIcon();
-    document.getElementById('btn-shuffle').style.opacity = 1;
-    document.getElementById('shuffle-count').innerText = 1;
-    isProcessing = false; selectedTile = null;
+    
+    let btnShuffle = document.getElementById('btn-shuffle');
+    if(btnShuffle) {
+        btnShuffle.style.opacity = 1;
+        document.getElementById('shuffle-count').innerText = 1;
+    }
+    
+    isProcessing = false; 
+    selectedTile = null;
 }
-
 /* --- LE CASH OUT (SYNC AVEC LOGIC.JS) --- */
 function cashOut() {
     let oldAmount = gameState.bankroll;
