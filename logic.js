@@ -1,6 +1,6 @@
 /* =========================================
-   TOPDOG ENGINE V24 (ECONOMY UPDATE)
-   CODENAME: THE SWAPPER + BANKROLL
+   TOPDOG ENGINE V25 (PAYOUT FIX)
+   CODENAME: CASH IN HAND
    ========================================= */
 
 const CONFIG = {
@@ -12,15 +12,13 @@ const CONFIG = {
 let gameState = {
     grid: [], 
     bankroll: 0, // Argent du joueur (Sauvegardé)
-    reserve: 0,  // Gains de la partie en cours
+    reserve: 0,  
     shuffleLeft: 1,
     dogs: [], status: 'idle', timer: null, timeLeft: 0,
-    
-    // Sac de gravité (pour le jeu en cours)
     gravityBag: []
 };
 
-/* --- 1. LE DECK PARFAIT (Inventaire Initial) --- */
+/* --- 1. LE DECK PARFAIT --- */
 function createPerfectDeck() {
     let deck = [];
     let counts = [8, 8, 8, 8, 7, 7, 7, 7];
@@ -31,7 +29,6 @@ function createPerfectDeck() {
         let count = counts[i];
         for (let k = 0; k < count; k++) deck.push(val);
     }
-    
     return deck.sort(() => Math.random() - 0.5); 
 }
 
@@ -56,14 +53,11 @@ function countConflicts(r, c, grid) {
         getSafeVal(r-1, c, grid), getSafeVal(r+1, c, grid),
         getSafeVal(r, c-1, grid), getSafeVal(r, c+1, grid)
     ];
-    
-    neighbors.forEach(n => {
-        if (n === val) conflicts++;
-    });
+    neighbors.forEach(n => { if (n === val) conflicts++; });
     return conflicts;
 }
 
-/* --- 3. LE SWAPPER (L'ALGORITHME V23) --- */
+/* --- 3. LE SWAPPER --- */
 function solveGridBySwapping(grid) {
     let maxPasses = 1000; 
     let hasConflicts = true;
@@ -89,7 +83,6 @@ function solveGridBySwapping(grid) {
             
             if (countConflicts(r, c, grid) > 0) {
                 hasConflicts = true;
-                let bestSwap = null;
                 
                 for(let k=0; k<10; k++) {
                     let randIdx = Math.floor(Math.random() * numberPositions.length);
@@ -107,7 +100,6 @@ function solveGridBySwapping(grid) {
                     let conflictsB = countConflicts(partner.r, partner.c, grid);
                     
                     if (conflictsA === 0 && conflictsB === 0) {
-                        bestSwap = null; 
                         break; 
                     } else {
                         grid[r][c].val = valA;
@@ -120,8 +112,7 @@ function solveGridBySwapping(grid) {
     console.log(`Grid solved in ${pass} swaps.`);
 }
 
-/* --- PERSISTANCE (NEW) --- */
-// On utilise 'topdog_wallet' pour être cohérent avec l'accueil
+/* --- PERSISTANCE & PAIEMENT (CORRIGÉ) --- */
 function loadWallet() {
     let saved = localStorage.getItem('topdog_wallet');
     return saved ? parseInt(saved) : 0;
@@ -130,13 +121,27 @@ function saveWallet(amount) {
     localStorage.setItem('topdog_wallet', amount);
 }
 
-// Fonction appelée quand un chien gagne pour créditer le joueur
+// Fonction appelée quand un chien gagne
 function payoutWinner(winningDogId) {
     let winner = gameState.dogs.find(d => d.id === winningDogId);
     if(winner) {
-        // On ajoute la mise du chien gagnant au portefeuille
+        console.log("💰 PAIEMENT ! Chien gagnant:", winner.name, "Montant:", winner.bet);
+        
+        // 1. Ajouter l'argent
         gameState.bankroll += winner.bet;
+        
+        // 2. Sauvegarder
         saveWallet(gameState.bankroll);
+        
+        // 3. FORCE UPDATE UI (Le fix critique)
+        // On met à jour l'affichage immédiatement sans attendre ui.js
+        let scoreEl = document.getElementById('score-display');
+        if(scoreEl) {
+            scoreEl.innerText = gameState.bankroll + " $"; // Ajout du sigle $
+            scoreEl.style.color = "#2ecc71"; // Petit flash vert
+            setTimeout(() => scoreEl.style.color = "", 500);
+        }
+
         return winner.bet;
     }
     return 0;
@@ -144,18 +149,21 @@ function payoutWinner(winningDogId) {
 
 /* --- INITIALISATION --- */
 function initGameEngine() {
-    console.log("%c --- TOPDOG V24 (ECONOMY) --- ", "background: #fff; color: #000; font-size:16px; font-weight:bold;");
+    console.log("%c --- TOPDOG V25 (FIXED) --- ", "background: #fff; color: #000; font-size:16px; font-weight:bold;");
     
     gameState.dogs = [];
-    gameState.bankroll = loadWallet(); // Charge l'argent
+    gameState.bankroll = loadWallet(); 
     
+    // UPDATE UI INITIAL
+    let scoreEl = document.getElementById('score-display');
+    if(scoreEl) scoreEl.innerText = gameState.bankroll + " $";
+
     gameState.gravityBag = []; 
     for(let i=1; i<=8; i++) for(let k=0; k<5; k++) gameState.gravityBag.push(i);
     gameState.gravityBag.sort(() => Math.random() - 0.5);
 
     // Setup Chiens
     let usedNames = [];
-    // LISTE DES MISES POSSIBLES
     const misesPossibles = [500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 75000, 80000, 100000, 150000];
 
     for(let i=1; i<=4; i++) {
@@ -170,17 +178,14 @@ function initGameEngine() {
     let newGrid = Array(8).fill().map(() => Array(8).fill(0));
     let startCols = Math.random() > 0.5 ? [0, 2, 4, 6] : [1, 3, 5, 7];
     
-    // 1. Placement Chiens
     gameState.dogs.forEach((dog, i) => {
         let c = startCols[i];
         let r = Math.floor(Math.random() * 2); 
         newGrid[r][c] = { val: 9, dogId: dog.id };
     });
 
-    // 2. Inventaire
     let deck = createPerfectDeck();
 
-    // 3. Remplissage Naïf
     for(let r=0; r<8; r++) {
         for(let c=0; c<8; c++) {
             if(!newGrid[r][c] || newGrid[r][c] === 0) {
@@ -190,7 +195,6 @@ function initGameEngine() {
         }
     }
 
-    // 4. SWAPPER
     solveGridBySwapping(newGrid);
 
     gameState.grid = newGrid;
@@ -203,7 +207,6 @@ function initGameEngine() {
     return gameState;
 }
 
-// ... (Le reste des fonctions est standard) ...
 function injectStrategicKeys() {
     for(let r=0; r<7; r++) { 
         for(let c=0; c<8; c++) {
@@ -253,25 +256,20 @@ function processMatch(r1, c1, r2, c2) {
     return true;
 }
 
-/* --- GRAVITÉ (V23) --- */
+/* --- GRAVITÉ --- */
 function pickForGravity(r, c, grid) {
     if(gameState.gravityBag.length < 5) {
          for(let i=1; i<=8; i++) for(let k=0; k<5; k++) gameState.gravityBag.push(i);
          gameState.gravityBag.sort(() => Math.random() - 0.5);
     }
-
     let forbidden = new Set();
     let n = [getSafeVal(r-1, c, grid), getSafeVal(r+1, c, grid), getSafeVal(r, c-1, grid), getSafeVal(r, c+1, grid)];
     n.forEach(v => { if(v) forbidden.add(v); });
 
     let idx = -1;
     for(let i=0; i<Math.min(gameState.gravityBag.length, 20); i++) {
-        if(!forbidden.has(gameState.gravityBag[i])) {
-            idx = i;
-            break;
-        }
+        if(!forbidden.has(gameState.gravityBag[i])) { idx = i; break; }
     }
-
     if(idx !== -1) return gameState.gravityBag.splice(idx, 1)[0];
     
     let val = gameState.gravityBag.shift();
@@ -294,7 +292,6 @@ function applyGravityLogic() {
         colItems = newItems.concat(colItems);
         for(let r=0; r<8; r++) gameState.grid[r][c] = colItems[r];
     }
-
     for(let r=0; r<8; r++) {
         for(let c=0; c<8; c++) {
             if(gameState.grid[r][c].val === -1) {
@@ -304,20 +301,27 @@ function applyGravityLogic() {
     }
 }
 
+/* --- VERIFICATION VICTOIRE (MODIFIÉ) --- */
 function checkWinCondition() {
     for(let c=0; c<8; c++) {
         let cell = gameState.grid[7][c]; 
         if(cell.val === 9) {
-            gameState.status = 'won';
-            return { won: true, dogId: cell.dogId };
+            // VERIF ANTI-DOUBLON
+            if(gameState.status !== 'won') {
+                gameState.status = 'won';
+                
+                // >>> DÉCLENCHE LE PAIEMENT ICI <<<
+                payoutWinner(cell.dogId);
+                
+                return { won: true, dogId: cell.dogId };
+            }
         }
     }
     return { won: false };
 }
 
-/* --- BRASSAGE V23 --- */
 function shuffleBoardLogic() {
-    console.log("--- BRASSAGE V23 ---");
+    console.log("--- BRASSAGE V25 ---");
     if(gameState.shuffleLeft <= 0) return false;
     gameState.shuffleLeft--;
 
@@ -332,32 +336,13 @@ function shuffleBoardLogic() {
     let possibleSets = [[0, 2, 4, 6], [1, 3, 5, 7], [0, 2, 5, 7]];
     let chosenCols = possibleSets[Math.floor(Math.random() * possibleSets.length)];
     chosenCols.sort(() => Math.random() - 0.5);
-    
     let dogMap = {};
     dogs.forEach((dog, i) => { dogMap[chosenCols[i]] = dog; });
 
-    // 1. Place Chiens
-    for(let c=0; c<8; c++) {
-        if(dogMap[c]) {
-            let r = Math.floor(Math.random() * 2);
-            newGrid[r][c] = dogMap[c];
-        }
-    }
-
-    // 2. Place Chiffres
-    for(let r=0; r<8; r++) {
-        for(let c=0; c<8; c++) {
-            if(!newGrid[r][c] || newGrid[r][c] === 0) {
-                let val = deck.pop();
-                if(val === undefined) val = Math.floor(Math.random()*8)+1; 
-                newGrid[r][c] = { val: val, dogId: null };
-            }
-        }
-    }
+    for(let c=0; c<8; c++) { if(dogMap[c]) { let r = Math.floor(Math.random() * 2); newGrid[r][c] = dogMap[c]; } }
+    for(let r=0; r<8; r++) { for(let c=0; c<8; c++) { if(!newGrid[r][c] || newGrid[r][c] === 0) { let val = deck.pop(); if(val === undefined) val = Math.floor(Math.random()*8)+1; newGrid[r][c] = { val: val, dogId: null }; } } }
     
-    // 3. SWAPPER
     solveGridBySwapping(newGrid);
-
     gameState.grid = newGrid;
     injectStrategicKeys();
     return true;
