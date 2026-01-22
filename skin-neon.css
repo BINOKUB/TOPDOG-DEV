@@ -1,10 +1,12 @@
-/* MODE NÉON */
+/* MODE NÉON (CORRIGÉ) - DOIT ÊTRE VIOLET/FONCÉ */
 :root {
     --cyan: #ff00ff; /* On remplace le cyan par du MAGENTA */
 }
 
 body {
+    /* Fond dégradé VIOLET FONCÉ vers BLEU */
     background: linear-gradient(135deg, #2b1055, #7597de) !important;
+    color: #fff !important;
 }
 
 /* Le texte HUD en rose */
@@ -17,6 +19,7 @@ body {
 #game-grid { 
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.4); 
     border: 1px solid rgba(255, 0, 255, 0.5);
+    background: rgba(0,0,0,0.3); /* Un peu sombre pour lisibilité */
 }
 
 .tile { 
