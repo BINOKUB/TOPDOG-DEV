@@ -45,22 +45,30 @@ body {
     color: #000000 !important;
 }
 
-/* --- LE CHIEN (LA CORRECTION) --- */
+/* --- LE CHIEN (LA CORRECTION V2 - TAILLE MAÎTRISÉE) --- */
 .tile.nine {
     background: #ff00ff !important; /* Fond Rose */
     color: #fff !important;
     box-shadow: 0 0 20px #ff00ff;
     
-    /* On s'assure que le contenu est centré */
+    /* On s'assure que le contenu est parfaitement centré */
     display: flex !important;
     align-items: center;
     justify-content: center;
+    
+    /* SÉCURITÉ : On empêche la case de grandir */
+    overflow: hidden !important;
+    padding: 0 !important;
 }
 
 /* ICI : ON AJOUTE LA FACE DU CHIEN MANUELLEMENT */
 .tile.nine::before {
     content: '🐶';  /* L'émoji chien */
-    font-size: 2em; /* Bien gros */
+    
+    /* ON RÉDUIT LA TAILLE POUR QU'IL RENTRE */
+    font-size: 1.6em !important; /* Au lieu de 2em */
+    line-height: 1 !important;   /* Pour éviter les espaces verticaux */
+    
     filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
 }
 
