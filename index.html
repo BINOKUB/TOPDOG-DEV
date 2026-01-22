@@ -11,6 +11,7 @@
             --orange: #e67e22;
             --green: #2ecc71;
             --purple: #9b59b6;
+            --gold: #ffd700;
             --glass: rgba(255, 255, 255, 0.05);
         }
 
@@ -58,7 +59,7 @@
             display: flex; flex-direction: column; gap: 20px;
         }
 
-        /* STATUT JOUEUR (Nouveau) */
+        /* STATUT JOUEUR */
         .player-status {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.3);
@@ -80,7 +81,7 @@
         }
         .btn-play:active { transform: scale(0.96); box-shadow: 0 5px 10px rgba(230, 126, 34, 0.2); }
 
-        /* BOUTON STORE (Nouveau) */
+        /* BOUTON STORE */
         .btn-store {
             background: transparent; color: var(--cyan); text-decoration: none;
             padding: 12px 0; border-radius: 50px; border: 1px solid var(--cyan);
@@ -144,35 +145,36 @@
     <div class="footer">V1.1 STORE EDITION • STUDIO CODE</div>
 
     <script>
-        // Fonction pour mettre à jour l'affichage
         function updateLobbyUI() {
             const savedMoney = parseInt(localStorage.getItem('topdog_wallet')) || 0;
             
-            // Affichage argent
+            // Affichage argent (avec espace pour les milliers)
             document.getElementById('lobby-wallet').innerText = new Intl.NumberFormat('fr-FR').format(savedMoney) + " $";
 
             // Calcul du rang
             let rank = "🐶 CHIOT";
-            let color = "#fff"; // Couleur par défaut
+            let color = "#fff"; 
 
-            if(savedMoney > 1000) { rank = "🦊 RENARD"; color = "#e67e22"; }
-            if(savedMoney > 10000) { rank = "🐺 LOUP"; color = "#95a5a6"; }
-            if(savedMoney > 100000) { rank = "🦁 TOPDOG"; color = "#9b59b6"; }
-            if(savedMoney > 1000000) { rank = "👑 ROI"; color = "#ffd700"; } // Nouveau rang millionnaire
+            if(savedMoney >= 1000) { rank = "🦊 RENARD"; color = "#e67e22"; }
+            if(savedMoney >= 10000) { rank = "🐺 LOUP"; color = "#95a5a6"; }
+            if(savedMoney >= 100000) { rank = "🦁 TOPDOG"; color = "#9b59b6"; }
+            if(savedMoney >= 1000000) { rank = "👑 ROI"; color = "#ffd700"; }
+            if(savedMoney >= 10000000) { rank = "💎 EMPEREUR"; color = "#00f3ff"; } // Rang secret ;)
             
             const rankEl = document.getElementById('lobby-rank');
             rankEl.innerText = rank;
             rankEl.style.color = color;
         }
 
-        // 1. On lance au chargement
+        // 1. Mise à jour immédiate
         updateLobbyUI();
 
-        // 2. MAGIE : On relance dès que la page redevient visible !
-        // (Quand tu reviens du jeu ou de la boutique)
-        window.onfocus = function() {
-            updateLobbyUI();
-        };
+        // 2. Mise à jour quand on clique sur l'onglet
+        window.onfocus = updateLobbyUI;
+
+        // 3. FORCE DE SÉCURITÉ : Mise à jour toutes les secondes
+        // (Ça règle le problème si le navigateur ne détecte pas le "focus")
+        setInterval(updateLobbyUI, 1000);
     </script>
 
 </body>
