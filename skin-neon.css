@@ -1,36 +1,76 @@
-/* MODE NÉON (CORRIGÉ) - DOIT ÊTRE VIOLET/FONCÉ */
+/* MODE NÉON (V2 - LISIBILITÉ MAXIMALE) */
 :root {
-    --cyan: #ff00ff; /* On remplace le cyan par du MAGENTA */
+    --cyan: #ff00ff; /* Variable globale Magenta */
 }
 
+/* 1. LE FOND GÉNÉRAL (Reste sombre pour l'ambiance) */
 body {
-    /* Fond dégradé VIOLET FONCÉ vers BLEU */
-    background: linear-gradient(135deg, #2b1055, #7597de) !important;
+    background: linear-gradient(135deg, #1a0b2e, #4a148c) !important;
     color: #fff !important;
 }
 
-/* Le texte HUD en rose */
+/* 2. LE TEXTE DU JEU (HUD) */
 .skin-text { 
     color: #ff00ff !important; 
     text-shadow: 0 0 10px #ff00ff; 
 }
 
-/* La Grille brillante */
+/* 3. LA GRILLE (Le cadre) */
 #game-grid { 
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.4); 
-    border: 1px solid rgba(255, 0, 255, 0.5);
-    background: rgba(0,0,0,0.3); /* Un peu sombre pour lisibilité */
+    box-shadow: 0 0 40px rgba(255, 0, 255, 0.3); 
+    border: 2px solid rgba(255, 0, 255, 0.5);
+    background: rgba(0, 0, 0, 0.5); /* Fond de la grille sombre */
 }
 
+/* 4. LES TUILES (C'est ici que tout change !) */
 .tile { 
-    border-color: rgba(255, 0, 255, 0.3) !important; 
+    /* Fond CLAIR (Blanc cassé) pour que le texte noir ressorte */
+    background: rgba(240, 240, 255, 0.9) !important;
+    
+    /* Bordure Rose Néon fine */
+    border: 2px solid #ff00ff !important;
+    
+    /* TEXTE NOIR (Comme demandé) */
+    color: #000 !important;
+    font-weight: 900 !important; /* Très gras */
+    font-family: 'Segoe UI', sans-serif !important;
+    
+    /* Effet de lueur autour de la case (pas sur le texte) */
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+    
+    /* On enlève l'ombre du texte pour la netteté */
+    text-shadow: none !important;
 }
 
-/* Boutons et Titre */
+/* 5. TUILES VIDES (Elles doivent rester transparentes) */
+.tile.empty {
+    background: rgba(255, 255, 255, 0.05) !important; /* Très léger */
+    border: 1px solid rgba(255, 0, 255, 0.1) !important;
+    box-shadow: none !important;
+}
+
+/* 6. COULEURS SPÉCIFIQUES DES CHIFFRES 
+   On force tout en NOIR ou GRIS FONCÉ pour le confort,
+   sauf si tu veux garder un code couleur subtil. 
+   Ici, je mets tout en noir pour un contraste parfait. */
+.val-1, .val-2, .val-3, .val-4, .val-5, .val-6, .val-7, .val-8 {
+    color: #000 !important;
+}
+
+/* 7. LE CHIEN (Le 9) */
+.tile.nine {
+    background: #ff00ff !important; /* Fond Rose pour le chien */
+    color: #fff !important; /* Texte Blanc */
+    box-shadow: 0 0 20px #ff00ff;
+}
+
+/* 8. BOUTONS ET TITRES */
 .btn-circle { 
     border-color: #ff00ff !important; 
     color: #ff00ff !important; 
+    background: rgba(0,0,0,0.5);
 }
 .top-bar h1 { 
-    text-shadow: 0 0 15px #ff00ff; 
+    text-shadow: 0 0 15px #ff00ff;
+    color: #fff !important;
 }
