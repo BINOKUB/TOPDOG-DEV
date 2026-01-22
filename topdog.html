@@ -7,23 +7,23 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>TOPDOG</title>
     <link rel="manifest" href="./manifest.json">
-    <link rel="stylesheet" href="style.css?v=24"> 
     <link rel="icon" type="image/png" href="./icon-dog-192.png">
     <link rel="apple-touch-icon" href="./icon-dog-192.png">
+    
+    <link rel="stylesheet" href="style.css?v=24"> 
+
+    <link id="skin-stylesheet" rel="stylesheet" href="">
     
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-        /* FIX: On force le corps à prendre toute la hauteur pour voir le fond */
         body { 
             overscroll-behavior: none; 
             -webkit-user-select: none; user-select: none; 
             -webkit-tap-highlight-color: transparent; 
-            min-height: 100vh; /* IMPORTANT POUR LE FOND */
-            margin: 0;
+            min-height: 100vh; margin: 0;
             transition: background 0.5s ease;
         }
-
         #start-screen {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: #050505; z-index: 999;
@@ -44,6 +44,25 @@
         }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
+
+    <script>
+        (function() {
+            const activeBg = localStorage.getItem('topdog_active_bg');
+            const link = document.getElementById('skin-stylesheet');
+            
+            // Mapping entre l'ID du catalogue et le fichier CSS
+            const skinMap = {
+                'bg_night': 'skin-neon.css',
+                'bg_cyber': 'skin-cyber.css',
+                'bg_gold': 'skin-gold.css',
+                'bg_diamond': 'skin-diamond.css'
+            };
+
+            if (activeBg && skinMap[activeBg]) {
+                link.href = skinMap[activeBg];
+            }
+        })();
+    </script>
 </head>
 <body>
 
@@ -99,101 +118,6 @@
                 startGame();
             }
         }
-    </script>
-
-    <script>
-        (function applySkin() {
-            const activeBg = localStorage.getItem('topdog_active_bg') || 'bg_default';
-            const body = document.body;
-            const startScreen = document.getElementById('start-screen');
-            const styleSheet = document.createElement("style");
-
-            // Fonction pour injecter du CSS forcé (!important)
-            function injectCSS(css) {
-                styleSheet.innerText = css;
-                document.head.appendChild(styleSheet);
-            }
-
-            switch(activeBg) {
-                case 'bg_night': // MODE NÉON (Celui que tu veux voir !)
-                    const neonBg = "linear-gradient(135deg, #2b1055, #7597de)"; 
-                    body.style.background = neonBg;
-                    if(startScreen) startScreen.style.background = neonBg;
-                    
-                    // ON FORCE LES COULEURS AVEC DU CSS DYNAMIQUE
-                    injectCSS(`
-                        :root { --cyan: #ff00ff !important; } /* Change la variable globale */
-                        .skin-text { color: #ff00ff !important; text-shadow: 0 0 10px #ff00ff; }
-                        #game-grid { 
-                            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3); 
-                            border: 1px solid rgba(255,0,255,0.3);
-                        }
-                        .tile { border-color: rgba(255,0,255,0.2) !important; }
-                        .btn-circle { border-color: #ff00ff !important; color: #ff00ff !important; }
-                        .top-bar h1 { text-shadow: 0 0 15px #ff00ff; }
-                    `);
-                    break;
-                
-                case 'bg_cyber': // MODE MATRIX
-                    body.style.background = "#000";
-                    const matrixBg = "linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px)";
-                    body.style.backgroundImage = matrixBg;
-                    body.style.backgroundSize = "20px 20px";
-                    
-                    if(startScreen) {
-                        startScreen.style.background = "#000";
-                        startScreen.style.backgroundImage = matrixBg;
-                        startScreen.style.backgroundSize = "20px 20px";
-                    }
-
-                    injectCSS(`
-                        :root { --cyan: #00ff00 !important; }
-                        .skin-text { color: #00ff00 !important; text-shadow: 0 0 10px #00ff00; }
-                        #game-grid { box-shadow: 0 0 30px rgba(0, 255, 0, 0.2); border: 1px solid #00ff00; }
-                        .tile { border-color: #004400 !important; font-family: 'Courier New', monospace; }
-                        .dog-badge { background: #00ff00 !important; color: #000 !important; }
-                    `);
-                    break;
-
-                case 'bg_gold': // MODE MILLIARDAIRE
-                    const goldBg = "radial-gradient(circle, #6d5612 0%, #1a1600 100%)";
-                    body.style.background = goldBg;
-                    if(startScreen) startScreen.style.background = goldBg;
-                    
-                    injectCSS(`
-                        :root { --cyan: #ffd700 !important; }
-                        .skin-text { color: #ffd700 !important; }
-                        #game-grid { border: 2px solid #ffd700; box-shadow: 0 0 50px rgba(255, 215, 0, 0.4); }
-                        .tile { border: 1px solid rgba(255, 215, 0, 0.3) !important; }
-                    `);
-                    break;
-                
-                case 'bg_diamond': // MODE DIAMANT
-                    const diamondBg = "linear-gradient(to right, #e0eafc, #cfdef3)";
-                    body.style.background = diamondBg;
-                    body.style.color = "#333";
-                    
-                    if(startScreen) {
-                        startScreen.style.background = diamondBg;
-                        // On force le titre en noir
-                        const title = startScreen.querySelector('.logo-title');
-                        if(title) {
-                            title.style.webkitTextFillColor = "#333"; 
-                            title.style.background = "none";
-                        }
-                    }
-
-                    injectCSS(`
-                        :root { --cyan: #0072ff !important; --bg: #fff !important; }
-                        body { color: #333 !important; }
-                        .skin-text { color: #0072ff !important; }
-                        .tile { background: rgba(255,255,255,0.8) !important; border: 1px solid #ccc !important; color: #000 !important; }
-                        .tile.empty { background: rgba(255,255,255,0.3) !important; }
-                        h1 { text-shadow: none !important; color: #333 !important; -webkit-text-fill-color: #333 !important; }
-                    `);
-                    break;
-            }
-        })();
     </script>
 
     <script src="logic.js?v=25"></script>
