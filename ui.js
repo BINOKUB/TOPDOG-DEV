@@ -128,6 +128,10 @@ document.getElementById('btn-shuffle').onclick = () => {
 };
 
 function startGame() {
+    // SÉCURITÉ : On force la lecture de la mémoire avant de lancer le moteur
+    let saved = localStorage.getItem('topdog_wallet');
+    if(saved) gameState.bankroll = parseInt(saved);
+
     initGameEngine();
     renderBettingBoard();
     updateHUD();
