@@ -91,19 +91,9 @@
     <div class="store-grid" id="store-container">
         </div>
 
-    <script>
-        /* --- CATALOGUE DES ARTICLES (PRIX MILLIONNAIRES) --- */
-        const CATALOG = [
-            { id: 'bg_default', name: 'Original Dark', icon: '⚫', price: 0, desc: 'L\'ambiance classique du TopDog.' },
-            
-            // PRIX MISE À JOUR : 1 MILLION MINIMUM
-            { id: 'bg_night', name: 'Néon City', icon: '🌃', price: 1000000, desc: 'Le premier signe de richesse. Course nocturne.' },
-            
-            { id: 'bg_cyber', name: 'Cyber Matrix', icon: '🤖', price: 10000000, desc: 'Interface futuriste pour l\'élite technologique.' },
-            
-            { id: 'bg_gold', name: 'Luxe Doré', icon: '🏆', price: 100000000, desc: 'Le statut ultime. Réservé aux milliardaires.' }
-        ];
+    <script src="catalog.js"></script>
 
+    <script>
         /* --- SYSTÈME DE SAUVEGARDE --- */
         let wallet = parseInt(localStorage.getItem('topdog_wallet')) || 0;
         let inventory = JSON.parse(localStorage.getItem('topdog_inventory')) || ['bg_default']; 
@@ -111,11 +101,10 @@
 
         // Mise à jour affichage argent
         function updateWalletUI() {
-            // Affiche 1.5M ou 100k formaté proprement
             document.getElementById('wallet-display').innerText = formatBigMoney(wallet);
         }
 
-        // Formatter spécial Millions
+        // Formatter spécial Millions/Milliards
         function formatBigMoney(num) {
             return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num).replace('US', '');
         }
@@ -124,6 +113,12 @@
         function renderStore() {
             const container = document.getElementById('store-container');
             container.innerHTML = '';
+
+            // On utilise la variable CATALOG qui vient du fichier catalog.js
+            if(typeof CATALOG === 'undefined') {
+                container.innerHTML = '<p style="color:red">Erreur: Fichier catalog.js introuvable ou mal chargé.</p>';
+                return;
+            }
 
             CATALOG.forEach(item => {
                 let card = document.createElement('div');
