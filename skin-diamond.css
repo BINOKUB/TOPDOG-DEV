@@ -1,26 +1,29 @@
-/* SKIN DIAMANT PUR (V3 - FIX VISIBILITÉ CHRONO) */
+/* SKIN DIAMANT PUR (V4 - FIX HUD LISIBILITÉ) */
 :root {
     --cyan: #00e5ff;
 }
 
-/* 1. FOND DE LUXE (Clair et Brillant) */
+/* 1. FOND GLOBAL */
 body {
     background: radial-gradient(circle at center, #f0faff, #d7efff, #a7cbf2) !important;
     color: #003366 !important;
 }
 
-/* 2. HUD (C'EST ICI LA CORRECTION) */
-/* Les titres (Temps, Banque...) */
-.hud-label { 
-    color: #546e7a !important; 
-    font-weight: 800 !important; 
+/* --- C'EST ICI QUE ÇA CHANGE POUR LE HUD --- */
+
+/* Les titres (TEMPS, BANQUE...) en gris clair pour ne pas voler la vedette */
+.hud-label {
+    color: #bbbbbb !important;
+    font-weight: 800 !important;
+    text-shadow: none !important;
 }
 
-/* Les valeurs (Le Chrono, L'argent...) */
-/* On force le Bleu Foncé (#002f6c) pour que ce soit lisible sur le blanc */
-.hud-value, #timer-container, #score-display, #reserve-count { 
-    color: #002f6c !important; 
-    text-shadow: none !important; 
+/* Les VALEURS (Le Chrono, L'argent...) en BLANC CLATANT avec HALO */
+.hud-value, #timer-container, #score-display, #reserve-count {
+    color: #ffffff !important;  /* Blanc pur */
+    /* Effet de halo lumineux blanc */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 1),
+                 0 0 15px rgba(255, 255, 255, 0.6) !important;
     font-weight: 900 !important;
 }
 
@@ -37,12 +40,10 @@ body {
 .tile {
     background: linear-gradient(135deg, #ffffff 0%, #e1f5fe 100%) !important;
     border: 1px solid #fff !important;
-    
-    /* Chiffres en Bleu Profond */
-    color: #002f6c !important; 
+    /* Chiffres dans la grille en Bleu Profond pour le contraste sur fond clair */
+    color: #002f6c !important;
     font-weight: 900 !important;
     font-family: 'Segoe UI', sans-serif !important;
-    
     box-shadow: inset 2px 2px 5px rgba(255,255,255,1), 2px 2px 5px rgba(0,0,0,0.1);
     text-shadow: none !important;
 }
@@ -54,13 +55,12 @@ body {
     box-shadow: none !important;
 }
 
-/* CHIFFRES EN COULEUR PRÉCIEUSE */
+/* CHIFFRES DANS LA GRILLE */
 .val-1, .val-2, .val-3, .val-4, .val-5, .val-6, .val-7, .val-8 {
-    color: #002f6c !important; 
+    color: #002f6c !important;
 }
 
-/* 5. LE CHIEN (Fond Turquoise) */
-/* Note : Cosmetics.js gère l'emoji, ici on gère juste le cadre */
+/* 5. LE CHIEN (Cadre) */
 .tile.nine {
     background: radial-gradient(circle, #80deea, #00acc1) !important;
     border: 2px solid #fff !important;
