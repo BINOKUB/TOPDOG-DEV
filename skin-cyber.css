@@ -1,0 +1,32 @@
+/* MODE MATRIX */
+:root {
+    --cyan: #00ff00; /* Vert Hacker */
+}
+
+body {
+    background-color: #000 !important;
+    background-image: 
+        linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px) !important;
+    background-size: 20px 20px !important;
+}
+
+.skin-text { 
+    color: #00ff00 !important; 
+    text-shadow: 0 0 10px #00ff00; 
+}
+
+#game-grid { 
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.2); 
+    border: 1px solid #00ff00; 
+}
+
+.tile { 
+    border-color: #004400 !important; 
+    font-family: 'Courier New', monospace; 
+}
+
+.dog-badge { 
+    background: #00ff00 !important; 
+    color: #000 !important; 
+}
