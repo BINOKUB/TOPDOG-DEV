@@ -14,7 +14,16 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-        body { overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        /* FIX: On force le corps à prendre toute la hauteur pour voir le fond */
+        body { 
+            overscroll-behavior: none; 
+            -webkit-user-select: none; user-select: none; 
+            -webkit-tap-highlight-color: transparent; 
+            min-height: 100vh; /* IMPORTANT POUR LE FOND */
+            margin: 0;
+            transition: background 0.5s ease;
+        }
+
         #start-screen {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: #050505; z-index: 999;
@@ -57,7 +66,7 @@
     <div class="hud">
         <div class="hud-item">
             <span class="hud-label">RÉSERVE</span>
-            <span id="reserve-count" class="hud-value">&infin;</span>
+            <span id="reserve-count" class="hud-value skin-text">&infin;</span>
         </div>
         <div class="hud-item">
             <span class="hud-label">TEMPS</span>
@@ -94,64 +103,94 @@
 
     <script>
         (function applySkin() {
-            // 1. On récupère le décor actif
             const activeBg = localStorage.getItem('topdog_active_bg') || 'bg_default';
             const body = document.body;
             const startScreen = document.getElementById('start-screen');
+            const styleSheet = document.createElement("style");
 
-            // 2. On applique le style selon l'ID
+            // Fonction pour injecter du CSS forcé (!important)
+            function injectCSS(css) {
+                styleSheet.innerText = css;
+                document.head.appendChild(styleSheet);
+            }
+
             switch(activeBg) {
-                case 'bg_night': // MODE NÉON
-                    // Fond dégradé sombre et mystérieux
-                    const neonGradient = "linear-gradient(135deg, #0f0c29, #302b63, #24243e)";
-                    body.style.background = neonGradient;
-                    if(startScreen) startScreen.style.background = neonGradient;
+                case 'bg_night': // MODE NÉON (Le fameux)
+                    const neonBg = "linear-gradient(135deg, #2b1055, #7597de)"; // Plus clair pour être visible
+                    body.style.background = neonBg;
+                    if(startScreen) startScreen.style.background = neonBg;
                     
-                    // On change la couleur principale (Cyan -> Rose Néon)
-                    document.documentElement.style.setProperty('--cyan', '#ff00ff'); 
+                    // ON FORCE LES COULEURS AVEC DU CSS DYNAMIQUE
+                    injectCSS(`
+                        :root { --cyan: #ff00ff !important; } /* Change la variable globale */
+                        .skin-text { color: #ff00ff !important; text-shadow: 0 0 10px #ff00ff; }
+                        #game-grid { 
+                            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3); 
+                            border: 1px solid rgba(255,0,255,0.3);
+                        }
+                        .tile { border-color: rgba(255,0,255,0.2) !important; }
+                        .btn-circle { border-color: #ff00ff !important; color: #ff00ff !important; }
+                        .top-bar h1 { text-shadow: 0 0 15px #ff00ff; }
+                    `);
                     break;
                 
                 case 'bg_cyber': // MODE MATRIX
                     body.style.background = "#000";
-                    // Petit effet de grille verte
-                    const gridBg = "linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px)";
-                    body.style.backgroundImage = gridBg;
+                    const matrixBg = "linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px)";
+                    body.style.backgroundImage = matrixBg;
                     body.style.backgroundSize = "20px 20px";
                     
                     if(startScreen) {
                         startScreen.style.background = "#000";
-                        startScreen.style.backgroundImage = gridBg;
+                        startScreen.style.backgroundImage = matrixBg;
                         startScreen.style.backgroundSize = "20px 20px";
                     }
-                    
-                    // Tout devient vert hacker
-                    document.documentElement.style.setProperty('--cyan', '#00ff00'); 
+
+                    injectCSS(`
+                        :root { --cyan: #00ff00 !important; }
+                        .skin-text { color: #00ff00 !important; text-shadow: 0 0 10px #00ff00; }
+                        #game-grid { box-shadow: 0 0 30px rgba(0, 255, 0, 0.2); border: 1px solid #00ff00; }
+                        .tile { border-color: #004400 !important; font-family: 'Courier New', monospace; }
+                        .dog-badge { background: #00ff00 !important; color: #000 !important; }
+                    `);
                     break;
 
                 case 'bg_gold': // MODE MILLIARDAIRE
-                    const goldGradient = "radial-gradient(circle, #44370b 0%, #1a1600 100%)";
-                    body.style.background = goldGradient;
-                    if(startScreen) startScreen.style.background = goldGradient;
+                    const goldBg = "radial-gradient(circle, #6d5612 0%, #1a1600 100%)";
+                    body.style.background = goldBg;
+                    if(startScreen) startScreen.style.background = goldBg;
                     
-                    // Tout devient or
-                    document.documentElement.style.setProperty('--cyan', '#ffd700'); 
+                    injectCSS(`
+                        :root { --cyan: #ffd700 !important; }
+                        .skin-text { color: #ffd700 !important; }
+                        #game-grid { border: 2px solid #ffd700; box-shadow: 0 0 50px rgba(255, 215, 0, 0.4); }
+                        .tile { border: 1px solid rgba(255, 215, 0, 0.3) !important; }
+                    `);
                     break;
                 
                 case 'bg_diamond': // MODE DIAMANT
-                    const diamondGradient = "linear-gradient(to right, #e0eafc, #cfdef3)";
-                    body.style.background = diamondGradient;
-                    body.style.color = "#333"; 
-                    if(startScreen) {
-                        startScreen.style.background = diamondGradient;
-                        startScreen.children[0].style.webkitTextFillColor = "#333"; // Titre sombre
-                    }
+                    const diamondBg = "linear-gradient(to right, #e0eafc, #cfdef3)";
+                    body.style.background = diamondBg;
+                    body.style.color = "#333";
                     
-                    document.documentElement.style.setProperty('--bg', '#fff'); 
-                    document.documentElement.style.setProperty('--cyan', '#0072ff');
-                    break;
+                    if(startScreen) {
+                        startScreen.style.background = diamondBg;
+                        // On force le titre en noir
+                        const title = startScreen.querySelector('.logo-title');
+                        if(title) {
+                            title.style.webkitTextFillColor = "#333"; 
+                            title.style.background = "none";
+                        }
+                    }
 
-                default: // ORIGINAL
-                    // On ne fait rien, le CSS par défaut s'applique
+                    injectCSS(`
+                        :root { --cyan: #0072ff !important; --bg: #fff !important; }
+                        body { color: #333 !important; }
+                        .skin-text { color: #0072ff !important; }
+                        .tile { background: rgba(255,255,255,0.8) !important; border: 1px solid #ccc !important; color: #000 !important; }
+                        .tile.empty { background: rgba(255,255,255,0.3) !important; }
+                        h1 { text-shadow: none !important; color: #333 !important; -webkit-text-fill-color: #333 !important; }
+                    `);
                     break;
             }
         })();
