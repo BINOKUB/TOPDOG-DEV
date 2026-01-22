@@ -128,11 +128,23 @@ document.getElementById('btn-shuffle').onclick = () => {
 };
 
 function startGame() {
-    // SÉCURITÉ : On force la lecture de la mémoire avant de lancer le moteur
-    let saved = localStorage.getItem('topdog_wallet');
-    if(saved) gameState.bankroll = parseInt(saved);
+    // 1. FORCE BRUTE : On relit le disque dur immédiatement
+    // C'est ça qui va empêcher le retour au "750k" fantôme
+    let realMoney = localStorage.getItem('topdog_wallet');
+    
+    console.log("--- RESET DU JEU ---");
+    console.log("Argent en mémoire avant : " + (typeof gameState !== 'undefined' ? gameState.bankroll : '???'));
+    console.log("Argent réel sur le disque : " + realMoney);
 
+    // 2. On lance le moteur
     initGameEngine();
+    
+    // 3. CORRECTION : On écrase la mémoire du jeu avec la vraie valeur du disque
+    if(realMoney !== null) {
+        gameState.bankroll = parseInt(realMoney);
+    }
+
+    // 4. La suite normale...
     renderBettingBoard();
     updateHUD();
     renderGrid();
