@@ -57,6 +57,49 @@
             background: transparent; border: 1px solid #fff; color: #fff;
             text-decoration: none; border-radius: 50px; width: 200px;
         }
+
+        /* --- OPTIMISATION MOBILE --- */
+        @media (max-width: 600px) {
+            body { 
+                padding: 10px; /* On perd moins de place sur les bords */
+            }
+            h1 { font-size: 1.8em; }
+            
+            .store-grid {
+                /* FORCE 2 COLONNES SUR MOBILE (Plus compact) */
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px; /* Espace plus petit entre les cartes */
+            }
+            
+            .item-card {
+                padding: 10px; /* Cartes plus compactes */
+            }
+            
+            .item-preview {
+                width: 50px; height: 50px; font-size: 24px; margin-bottom: 5px;
+            }
+            
+            .item-name { 
+                font-size: 0.8em; 
+                height: 2.2em; /* Force 2 lignes max pour aligner */
+                overflow: hidden;
+                display: flex; align-items: center; justify-content: center;
+            }
+            
+            .item-desc {
+                display: none; /* ASTUCE : On cache la description sur mobile pour gagner de la place */
+            }
+            
+            .btn-action {
+                font-size: 0.8em; padding: 6px 0;
+            }
+            
+            .wallet-box {
+                font-size: 1.2em; padding: 8px 15px; margin-bottom: 20px;
+            }
+        }
+
+        
     </style>
 </head>
 <body>
