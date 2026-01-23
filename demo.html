@@ -4,101 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TOPDOG - Démo</title>
+    
     <link rel="stylesheet" href="style.css?v=FINAL">
-    <link rel="stylesheet" href="skin-neon.css"> <style>
-        /* OVERRIDES SPÉCIFIQUES À LA DÉMO */
-        body {
-            background: #000;
-            justify-content: center; /* Centre tout */
+    <link rel="stylesheet" href="skin-neon.css"> 
+    
+    <style>
+        /* 1. FORCE LE FOND NOIR (CRUCIAL) */
+        html, body {
+            background-color: #000 !important;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 70%);
+            height: 100%;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center;
+            overflow: hidden; /* Pas de scroll */
         }
         
-        /* On cache tout ce qui n'est pas la grille */
-        .top-bar, .hud, .controls, #betting-board { display: none; }
-
-        /* Titre Démo */
+        /* 2. TITRE */
         .demo-title {
-            position: absolute; top: 10%;
             font-size: 2em; color: #fff; font-weight: 900;
             text-shadow: 0 0 15px #00f3ff;
             text-transform: uppercase; letter-spacing: 5px;
-            animation: pulse 2s infinite;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        /* La grille démo */
+        /* 3. GRILLE DÉMO */
         #game-grid {
-            pointer-events: none; /* Le joueur ne peut pas cliquer, c'est un film */
-            border-color: #00f3ff;
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
+            pointer-events: none;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
+            background: #000;
+            border-radius: 15px;
+            width: 300px; height: 300px; /* Taille fixe pour la démo */
+            display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); gap: 2px;
+            padding: 4px;
         }
 
-        /* La Main Fantôme (Curseur) */
+        /* TUILES */
+        .tile {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 20px;
+            border-radius: 3px;
+            background: #111; color: #555;
+        }
+        .tile.nine {
+            background: #ff00ff !important; color: #fff !important;
+            font-size: 25px; border: 2px solid #fff;
+            box-shadow: 0 0 15px #ff00ff;
+            z-index: 10;
+        }
+        .tile.val-4 { color: #fff; background: #333; border: 1px solid #ff00ff; }
+        .tile.val-5 { color: #fff; background: #333; border: 1px solid #2ecc71; }
+        .tile.val-2, .tile.val-7 { color: #444; background: #0a0a0a; border: none; }
+        .tile.empty { background: transparent; border: 1px dashed #222; }
+
+        /* CURSEUR MAIN */
         #ghost-hand {
             position: absolute; width: 40px; height: 40px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="2"><path d="M9 20l-5-5 5-5v3.5a8.5 8.5 0 1 1 8.5 8.5h-3.5"/></svg>'); /* Simplifié */
-            font-size: 40px;
-            text-shadow: 2px 2px 0 #000;
-            z-index: 999;
+            font-size: 40px; z-index: 999;
             transition: all 0.5s ease-in-out;
-            pointer-events: none;
-            display: none; /* Caché au début */
-        }
-        #ghost-hand::after {
-            content: '👆';
+            pointer-events: none; display: none;
+            filter: drop-shadow(0 0 5px #000);
         }
 
-        /* Bulle d'explication Math */
+        /* BULLE MATH */
         .math-bubble {
             position: absolute;
             background: #fff; color: #000;
-            padding: 10px 20px; border-radius: 20px;
-            font-weight: bold; font-size: 1.5em;
-            box-shadow: 0 0 20px #fff;
+            padding: 10px 20px; border-radius: 50px;
+            font-weight: 900; font-size: 1.2em;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
             opacity: 0; transition: opacity 0.3s;
-            z-index: 1000;
+            z-index: 1000; pointer-events: none;
+            white-space: nowrap;
         }
 
-        /* Bouton Retour */
+        /* 4. BOUTON RETOUR (CORRIGÉ) */
         .btn-close-demo {
-            position: absolute; bottom: 10%;
-            background: transparent; border: 2px solid #fff; color: #fff;
+            margin-top: 30px; /* Espace sous la grille */
+            background: transparent; 
+            border: 2px solid #00f3ff; color: #00f3ff;
             padding: 15px 40px; border-radius: 50px;
-            font-size: 1.2em; cursor: pointer;
+            font-size: 1.1em; cursor: pointer;
             text-decoration: none; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 2px;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            z-index: 2000;
+            display: inline-block; /* Assure l'affichage */
         }
-        .btn-close-demo:hover { background: #fff; color: #000; }
+        .btn-close-demo:hover {
+            background: #00f3ff; color: #000;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.6);
+        }
+        
+        /* HIGHLIGHT */
+        .tile.selected {
+            background: #fff !important; color: #000 !important;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #fff;
+        }
 
-        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; text-shadow: 0 0 30px #00f3ff; } 100% { opacity: 0.8; } }
     </style>
 </head>
 <body>
 
     <div class="demo-title">COMMENT JOUER</div>
 
-    <div class="game-container">
+    <div style="position: relative;">
         <div id="game-grid"></div>
-        <div id="ghost-hand"></div>
+        <div id="ghost-hand">👆</div>
         <div id="math-display" class="math-bubble"></div>
     </div>
 
-    <a href="topdog.html" class="btn-close-demo">J'AI COMPRIS</a>
+    <a href="index.html" class="btn-close-demo">J'AI COMPRIS</a>
 
     <script>
         const gridEl = document.getElementById('game-grid');
         const hand = document.getElementById('ghost-hand');
         const bubble = document.getElementById('math-display');
 
-        // SCÉNARIO PRÉ-ÉCRIT
-        // Une colonne simple pour la démo (Colonne 3)
-        // 0 = vide, 9 = chien
+        // SCÉNARIO SIMPLIFIÉ
         let demoState = [
             [0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0],
-            [0,0,0,9,0,0,0,0], // Le Chien est là (Ligne 2)
-            [0,0,0,4,0,0,0,0], // Chiffre 4
-            [0,0,0,5,0,0,0,0], // Chiffre 5 (Match !)
-            [0,0,0,2,0,0,0,0], // Décor
-            [0,0,0,7,0,0,0,0], // Décor
-            [0,0,0,0,0,0,0,0]  // Arrivée
+            [0,0,0,9,0,0,0,0], // Chien
+            [0,0,0,4,0,0,0,0], // 4
+            [0,0,0,5,0,0,0,0], // 5
+            [0,0,0,2,0,0,0,0], // 2
+            [0,0,0,7,0,0,0,0], // 7
+            [0,0,0,0,0,0,0,0]
         ];
 
         function renderDemo() {
@@ -111,10 +148,8 @@
                     tile.dataset.r = r; tile.dataset.c = c;
                     
                     if(val === 9) {
-                        tile.classList.add('nine'); // Le CSS fera le reste (cadre)
-                        tile.innerText = '🐕'; // Emoji direct pour la démo
-                        tile.style.fontSize = '40px';
-                        tile.style.background = '#000';
+                        tile.classList.add('nine'); 
+                        tile.innerText = '🐕'; 
                     } else if (val > 0) {
                         tile.innerText = val;
                         tile.classList.add('val-'+val);
@@ -126,90 +161,89 @@
             }
         }
 
-        // --- MOTEUR D'ANIMATION (TIMELINE) ---
         async function playScenario() {
             await wait(1000);
-
-            // ÉTAPE 1 : La main arrive sur le 4
+            
+            // 1. La main sur le 4
             await moveHandTo(3, 3);
             highlight(3, 3);
-            await wait(500);
+            await wait(600);
 
-            // ÉTAPE 2 : La main va sur le 5
+            // 2. La main sur le 5
             await moveHandTo(4, 3);
             highlight(4, 3);
-            await wait(500);
+            await wait(600);
 
-            // ÉTAPE 3 : EXPLICATION
+            // 3. Explication
             showBubble("4 + 5 = 9 !");
-            await wait(1500);
+            await wait(2000);
             hideBubble();
 
-            // ÉTAPE 4 : MATCH
+            // 4. Match
             hand.style.display = 'none';
-            // Animation CSS
-            document.querySelector('.tile[data-r="3"][data-c="3"]').style.transform = 'scale(0)';
-            document.querySelector('.tile[data-r="4"][data-c="3"]').style.transform = 'scale(0)';
+            // Animation disparition simple
+            let t1 = document.querySelector('.tile[data-r="3"][data-c="3"]');
+            let t2 = document.querySelector('.tile[data-r="4"][data-c="3"]');
+            if(t1) t1.style.opacity = 0; 
+            if(t2) t2.style.opacity = 0;
             await wait(300);
 
-            // ÉTAPE 5 : GRAVITÉ (Mise à jour des données)
-            demoState[3][3] = 9; // Le chien descend
-            demoState[2][3] = 0; // L'ancienne place du chien est vide
-            demoState[4][3] = 0; // Le 5 disparait
+            // 5. Chute
+            demoState[3][3] = 9; 
+            demoState[2][3] = 0; 
+            demoState[4][3] = 0; 
             renderDemo();
             
-            // Son de victoire simulé (visuel)
             showBubble("LE CHIEN DESCEND !");
             await wait(2000);
             hideBubble();
 
-            // BOUCLE : On recommence pour bien montrer
-            // Reset state
+            // Reset et boucle
             demoState = [
                 [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0], [0,0,0,9,0,0,0,0],
                 [0,0,0,4,0,0,0,0], [0,0,0,5,0,0,0,0], [0,0,0,2,0,0,0,0],
                 [0,0,0,7,0,0,0,0], [0,0,0,0,0,0,0,0]
             ];
             renderDemo();
-            playScenario(); // Boucle infinie
+            playScenario(); 
         }
 
-        // --- OUTILS ---
         function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
         function moveHandTo(r, c) {
             return new Promise(resolve => {
                 hand.style.display = 'block';
                 const tile = document.querySelector(`.tile[data-r="${r}"][data-c="${c}"]`);
-                const rect = tile.getBoundingClientRect();
-                // On positionne la main au centre de la case
-                hand.style.left = (rect.left + rect.width/2 - 20) + 'px';
-                hand.style.top = (rect.top + rect.height/2 - 10) + 'px';
-                
-                // Effet de clic
-                hand.style.transform = 'scale(1.2)';
-                setTimeout(() => {
-                    hand.style.transform = 'scale(1)';
-                    resolve();
-                }, 500);
+                if(tile) {
+                    const rect = tile.getBoundingClientRect();
+                    // Correction pour le positionnement relatif
+                    const containerRect = tile.parentElement.parentElement.getBoundingClientRect();
+                    
+                    hand.style.left = (rect.left - containerRect.left + rect.width/2 - 20) + 'px';
+                    hand.style.top = (rect.top - containerRect.top + rect.height/2) + 'px';
+                    
+                    hand.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        hand.style.transform = 'scale(1)';
+                        resolve();
+                    }, 500);
+                } else { resolve(); }
             });
         }
 
         function highlight(r, c) {
             const tile = document.querySelector(`.tile[data-r="${r}"][data-c="${c}"]`);
-            tile.classList.add('selected');
+            if(tile) tile.classList.add('selected');
         }
 
         function showBubble(text) {
-            const gridRect = gridEl.getBoundingClientRect();
             bubble.innerText = text;
-            bubble.style.top = (gridRect.top + gridRect.height / 2 - 20) + 'px';
-            bubble.style.left = (gridRect.left + 20) + 'px';
+            bubble.style.left = '-150px'; // À gauche de la grille
+            bubble.style.top = '100px';
             bubble.style.opacity = 1;
         }
         function hideBubble() { bubble.style.opacity = 0; }
 
-        // Lancement
         window.onload = () => {
             renderDemo();
             playScenario();
