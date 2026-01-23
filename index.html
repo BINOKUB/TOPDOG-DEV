@@ -4,177 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TOPDOG - Accueil</title>
+    
+    <link rel="stylesheet" href="style.css?v=FINAL">
+    
     <style>
-        :root {
-            --bg: #050505;
-            --cyan: #00f3ff;
-            --orange: #e67e22;
-            --green: #2ecc71;
-            --purple: #9b59b6;
-            --gold: #ffd700;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
-
         body {
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, #1a1a1a, #000);
+            height: 100vh; overflow: hidden;
             margin: 0; padding: 0;
-            background-color: var(--bg);
-            color: #fff;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .logo-container {
+            margin-bottom: 50px;
             text-align: center;
-            overflow: hidden;
+            animation: float 6s ease-in-out infinite;
         }
 
-        /* FOND ANIMÉ SUBTIL */
-        .background-glow {
-            position: absolute; width: 200vw; height: 200vw;
-            background: radial-gradient(circle, rgba(0, 243, 255, 0.03) 0%, rgba(0,0,0,0) 70%);
-            animation: rotate 60s linear infinite; z-index: -1;
-        }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* LOGO */
-        h1 {
-            font-size: 4em; font-weight: 900; font-style: italic; margin: 0;
+        .main-title {
+            font-size: 4em; font-weight: 900; font-style: italic;
             background: linear-gradient(45deg, #fff, #888);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: -2px; text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            letter-spacing: 5px; margin: 0;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+
         .subtitle {
-            color: var(--cyan); letter-spacing: 4px; font-weight: bold;
-            font-size: 0.9em; margin-top: -10px; margin-bottom: 40px; text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            font-family: monospace; color: #2ecc71; 
+            font-size: 1.2em; letter-spacing: 2px;
+            margin-top: 10px;
         }
 
-        /* CONTENEUR CARTE */
-        .card-container {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%; max-width: 400px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; gap: 20px;
-        }
-
-        /* STATUT JOUEUR */
-        .player-status {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.3);
-            padding: 10px 15px; border-radius: 10px; border: 1px solid #333;
-        }
-        .rank-badge { color: var(--purple); font-weight: bold; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; }
-        .wallet-display { color: var(--green); font-family: monospace; font-size: 1.1em; }
-
-        /* BOUTON D'ACTION */
-        .btn-play {
-            background: linear-gradient(90deg, var(--orange), #d35400);
-            color: white; text-decoration: none;
-            padding: 18px 0; border-radius: 50px;
-            font-size: 1.2em; font-weight: bold; letter-spacing: 1px;
-            box-shadow: 0 10px 30px rgba(230, 126, 34, 0.3);
+        /* LES GROS BOUTONS DU MENU */
+        .menu-btn {
+            display: block; width: 280px; text-decoration: none;
+            text-align: center; padding: 20px 0; margin: 15px 0;
+            border-radius: 50px; font-weight: 900; font-size: 1.5em;
+            text-transform: uppercase; letter-spacing: 2px;
             transition: transform 0.2s, box-shadow 0.2s;
-            display: block; width: 100%; margin-top: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
         }
-        .btn-play:active { transform: scale(0.96); box-shadow: 0 5px 10px rgba(230, 126, 34, 0.2); }
 
-        /* BOUTON STORE */
-        .btn-store {
-            background: transparent; color: var(--cyan); text-decoration: none;
-            padding: 12px 0; border-radius: 50px; border: 1px solid var(--cyan);
-            font-size: 0.9em; font-weight: bold; letter-spacing: 1px;
-            display: block; width: 100%; transition: 0.3s;
+        /* Bouton JOUER (Orange/Gold - Action Principale) */
+        .btn-play {
+            background: linear-gradient(90deg, #e67e22, #d35400);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(230, 126, 34, 0.4);
+            border: 2px solid #e67e22;
         }
-        .btn-store:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
+        .btn-play:active { transform: scale(0.95); }
 
-        .footer { margin-top: 30px; font-size: 0.7em; color: #444; font-family: monospace; }
-        
-        /* TEXTE & DEMO */
-        p { color: #aaa; line-height: 1.6; font-size: 0.95em; margin: 0; }
-        .highlight { color: #fff; font-weight: bold; }
-        .demo-row { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0; }
-        .mini-tile { width: 50px; height: 50px; background: #111; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5em; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .t-4 { color: #ff00ff; border: 1px solid rgba(255,0,255,0.3); }
-        .t-5 { color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
-        .plus { font-size: 1.5em; color: #555; }
-        .result { color: #fff; font-weight: bold; }
+        /* Bouton DÉMO (Bleu Néon - Action Secondaire) */
+        .btn-demo {
+            background: transparent;
+            color: #00f3ff;
+            border: 3px solid #00f3ff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            font-size: 1.2em; /* Un peu plus petit */
+        }
+        .btn-demo:active { transform: scale(0.95); background: rgba(0, 243, 255, 0.1); }
 
+        /* Animation flottante pour le logo */
+        @keyframes float { 
+            0% { transform: translateY(0px); } 
+            50% { transform: translateY(-20px); } 
+            100% { transform: translateY(0px); } 
+        }
+
+        /* Version Mobile */
+        @media (max-width: 600px) {
+            .main-title { font-size: 3em; }
+            .menu-btn { width: 80%; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="background-glow"></div>
-
-    <h1>TOPDOG</h1>
-    <div class="subtitle">L'Élite du Pari Stratégique</div>
-
-    <div class="card-container">
-        
-        <div class="player-status">
-            <div class="rank-badge" id="lobby-rank">🐶 CHIOT</div>
-            <div class="wallet-display" id="lobby-wallet">0 $</div>
-        </div>
-
-        <div style="text-align:center;">
-            <p style="font-size:0.8em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">La Règle d'Or</p>
-            <div class="demo-row">
-                <div class="mini-tile t-4">4</div>
-                <div class="plus">+</div>
-                <div class="mini-tile t-5">5</div>
-                <div class="plus">=</div>
-                <div class="result">9</div>
-            </div>
-        </div>
-
-        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); width:100%;">
-
-        <p>
-            Plongez dans l'arène. Misez sur vos chiens favoris et frayez-leur un chemin.<br><br>
-            <span class="highlight">Rapidité</span> • <span class="highlight">Stratégie</span> • <span class="highlight">Cash Out</span>
-        </p>
-
-       <a href="topdog.html" class="btn-play">LANCER LE JEU</a>
-       
-       <a href="store.html" class="btn-store">🛍️ ACCÉDER À LA BOUTIQUE</a>
-
+    <div class="logo-container">
+        <h1 class="main-title">TOPDOG</h1>
+        <div class="subtitle">CASINO EDITION</div>
     </div>
 
-    <div class="footer">V1.1 STORE EDITION • STUDIO CODE</div>
+    <a href="topdog.html" class="menu-btn btn-play">
+        JOUER 🎲
+    </a>
+
+    <a href="demo.html" class="menu-btn btn-demo">
+        DÉMO 🎓
+    </a>
+    
+    <div style="margin-top: 30px;">
+        <a href="store.html" style="color:#666; text-decoration:none; font-size:0.9em; border-bottom:1px dotted #666;">
+            Accès Boutique VIP
+        </a>
+    </div>
 
     <script>
-        function updateLobbyUI() {
-            const savedMoney = parseInt(localStorage.getItem('topdog_wallet')) || 0;
-            
-            // Affichage argent (avec espace pour les milliers)
-            document.getElementById('lobby-wallet').innerText = new Intl.NumberFormat('fr-FR').format(savedMoney) + " $";
-
-            // Calcul du rang
-            let rank = "🐶 CHIOT";
-            let color = "#fff"; 
-
-            if(savedMoney >= 1000) { rank = "🦊 RENARD"; color = "#e67e22"; }
-            if(savedMoney >= 10000) { rank = "🐺 LOUP"; color = "#95a5a6"; }
-            if(savedMoney >= 100000) { rank = "🦁 TOPDOG"; color = "#9b59b6"; }
-            if(savedMoney >= 1000000) { rank = "👑 ROI"; color = "#ffd700"; }
-            if(savedMoney >= 10000000) { rank = "💎 EMPEREUR"; color = "#00f3ff"; } // Rang secret ;)
-            
-            const rankEl = document.getElementById('lobby-rank');
-            rankEl.innerText = rank;
-            rankEl.style.color = color;
-        }
-
-        // 1. Mise à jour immédiate
-        updateLobbyUI();
-
-        // 2. Mise à jour quand on clique sur l'onglet
-        window.onfocus = updateLobbyUI;
-
-        // 3. FORCE DE SÉCURITÉ : Mise à jour toutes les secondes
-        // (Ça règle le problème si le navigateur ne détecte pas le "focus")
-        setInterval(updateLobbyUI, 1000);
+        document.addEventListener('click', function() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                ctx.resume();
+            }
+        });
     </script>
 
 </body>
