@@ -51,6 +51,7 @@
         .btn-action.owned { background: #3498db; color: #fff; }
         .btn-action.active { background: #555; color: #aaa; cursor: default; }
         .btn-action.locked { background: #333; color: #555; cursor: not-allowed; }
+        .btn-equipped { background: #555; color: #fff; opacity: 0.7; cursor: default; }
 
         .back-btn {
             display: block; margin: 40px auto; padding: 15px 30px;
@@ -61,18 +62,17 @@
         /* --- OPTIMISATION MOBILE --- */
         @media (max-width: 600px) {
             body { 
-                padding: 10px; /* On perd moins de place sur les bords */
+                padding: 10px; 
             }
             h1 { font-size: 1.8em; }
             
             .store-grid {
-                /* FORCE 2 COLONNES SUR MOBILE (Plus compact) */
                 grid-template-columns: 1fr 1fr !important;
-                gap: 8px; /* Espace plus petit entre les cartes */
+                gap: 8px;
             }
             
             .item-card {
-                padding: 10px; /* Cartes plus compactes */
+                padding: 10px; 
             }
             
             .item-preview {
@@ -81,13 +81,13 @@
             
             .item-name { 
                 font-size: 0.8em; 
-                height: 2.2em; /* Force 2 lignes max pour aligner */
+                height: 2.2em; 
                 overflow: hidden;
                 display: flex; align-items: center; justify-content: center;
             }
             
             .item-desc {
-                display: none; /* ASTUCE : On cache la description sur mobile pour gagner de la place */
+                display: none; 
             }
             
             .btn-action {
@@ -98,14 +98,12 @@
                 font-size: 1.2em; padding: 8px 15px; margin-bottom: 20px;
             }
         }
-
-        
     </style>
 </head>
 <body>
 
     <h1>BOUTIQUE VIP</h1>
-    <div class="wallet-box" id="wallet-display">Chargement...</div>
+    <div class="wallet-box" id="wallet-amount">Chargement...</div>
 
     <div class="section-title">🎨 AMBIANCES VISUELLES</div>
     <div class="store-grid" id="skin-grid"></div>
@@ -115,11 +113,13 @@
 
     <a href="index.html" class="back-btn">RETOUR ACCUEIL</a>
 
-   <script src="catalog.js?v=FINAL"></script>
+    <script src="catalog.js?v=FINAL"></script>
     <script>
         // 1. Initialisation
         const walletEl = document.getElementById('wallet-amount');
-        const gridEl = document.getElementById('store-grid');
+        // CORRECTION ICI : On cible les deux grilles séparément
+        const skinGridEl = document.getElementById('skin-grid');
+        const dogGridEl = document.getElementById('dog-grid');
 
         // On charge l'argent
         function getWallet() {
@@ -135,7 +135,6 @@
         function renderStore() {
             // Affiche l'argent
             const money = getWallet();
-            // Formattage propre (1G, 100M...)
             let displayMoney = money;
             if (money >= 1000000000) displayMoney = (money / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G';
             else if (money >= 1000000) displayMoney = (money / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -143,30 +142,30 @@
             
             walletEl.innerText = displayMoney + " $";
 
-            gridEl.innerHTML = '';
+            // On vide les deux grilles avant de remplir
+            skinGridEl.innerHTML = '';
+            dogGridEl.innerHTML = '';
 
-            // On fusionne tout (Skins + Chiens) pour l'affichage
+            // Fusion des catalogues avec le type
             const allItems = [
                 ...CATALOG.skins.map(i => ({...i, type: 'skin'})),
                 ...CATALOG.dogs.map(i => ({...i, type: 'dog'}))
             ];
 
-            // On filtre les items par défaut (prix 0) car on les a déjà
+            // On filtre les items par défaut (prix 0)
             const shopItems = allItems.filter(i => i.price > 0);
 
             shopItems.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 
-                // On vérifie si on le possède déjà
                 const inventory = getInventory(item.type);
                 const isOwned = inventory.includes(item.id);
                 
-                // On vérifie si c'est celui équipé actuellement
                 const activeId = localStorage.getItem('topdog_active_' + (item.type === 'skin' ? 'bg' : 'dog'));
                 const isEquipped = activeId === item.id;
 
-                // Visuel de l'item (Couleur ou Emoji)
+                // Visuel
                 let visual = '';
                 if(item.type === 'skin') {
                     visual = `<div class="item-preview" style="background:${item.color}; border-radius:50%;"></div>`;
@@ -174,17 +173,15 @@
                     visual = `<div class="item-preview" style="background:transparent; font-size:40px;">${item.emoji}</div>`;
                 }
 
-                // Bouton (Logique différente selon état)
+                // Bouton
                 let btnHtml = '';
                 if (isEquipped) {
                     btnHtml = `<button class="btn-action btn-equipped" disabled>ÉQUIPÉ</button>`;
                 } else if (isOwned) {
                     btnHtml = `<button class="btn-action btn-owned" onclick="equipItem('${item.type}', '${item.id}')">ÉQUIPER</button>`;
                 } else {
-                    // Vérif argent pour couleur bouton
                     const canBuy = money >= item.price;
                     const btnClass = canBuy ? 'btn-buy' : 'btn-locked';
-                    // Formattage prix bouton
                     let priceText = item.price >= 1000000 ? (item.price/1000000) + 'M' : item.price;
                     if(item.price >= 1000000000) priceText = (item.price/1000000000) + 'G';
                     
@@ -197,31 +194,31 @@
                     <div class="item-desc">${item.desc}</div>
                     ${btnHtml}
                 `;
-                gridEl.appendChild(card);
+                
+                // CORRECTION : On met l'objet dans la bonne étagère
+                if (item.type === 'skin') {
+                    skinGridEl.appendChild(card);
+                } else {
+                    dogGridEl.appendChild(card);
+                }
             });
         }
 
-        // 3. ACHAT INSTANTANÉ (Sans confirmation)
+        // 3. ACHAT INSTANTANÉ
         window.buyItem = function(type, id) {
             const list = type === 'skin' ? CATALOG.skins : CATALOG.dogs;
             const item = list.find(i => i.id === id);
             const currentMoney = getWallet();
 
             if (currentMoney >= item.price) {
-                // A. PAIEMENT
+                // Paiement
                 localStorage.setItem('topdog_wallet', currentMoney - item.price);
-
-                // B. LIVRAISON
+                // Livraison
                 let inventory = getInventory(type);
                 inventory.push(id);
                 localStorage.setItem('topdog_inventory_' + type, JSON.stringify(inventory));
-
-                // C. UPDATE UI INSTANTANÉ
+                // Update
                 renderStore(); 
-                
-                // Petit retour visuel (Optionnel, juste pour dire que ça a marché)
-                // On pourrait faire vibrer le téléphone ici si on voulait
-                
             } else {
                 alert("Fonds insuffisants ! Continue à jouer !");
             }
@@ -234,10 +231,9 @@
             } else {
                 localStorage.setItem('topdog_active_dog', id);
             }
-            renderStore(); // Met à jour les boutons
+            renderStore();
         };
 
-        // Lancement
         renderStore();
     </script>
 </body>
