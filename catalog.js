@@ -85,9 +85,9 @@ const CATALOG = {
             desc: "L'intelligence artificielle supérieure.",
             emoji: '🤖' 
         }
-    ]
+    ], // <--- C'EST ICI QU'IL MANQUAIT LA VIRGULE !
 
-// NOUVELLE SECTION BADGES
+    // 3. LES BADGES DE PRESTIGE
     badges: [
         { 
             id: 'badge_alpha', 
