@@ -6,6 +6,7 @@
     <title>TOPDOG - L'Élite</title>
     
     <link rel="stylesheet" href="style.css?v=FINAL">
+    <link rel="stylesheet" href="badges.css">
     
     <style>
         body {
@@ -42,14 +43,14 @@
             position: relative;
         }
 
-        /* --- BARRE DE STATUT (EMPEREUR) --- */
+        /* --- BARRE DE STATUT (MISE A JOUR) --- */
         .status-bar {
             background: #111; border-radius: 10px;
             padding: 10px 15px; margin-bottom: 25px;
             display: flex; justify-content: space-between; align-items: center;
             border: 1px solid #222; font-family: monospace;
         }
-        .rank { color: #00f3ff; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        /* On retire l'ancien style .rank car le badge gère ses couleurs */
         .money { color: #2ecc71; font-weight: bold; letter-spacing: 1px; }
 
         /* --- VISUEL RÈGLE D'OR --- */
@@ -122,7 +123,10 @@
     <div class="vip-card">
         
         <div class="status-bar">
-            <div class="rank">💎 <span id="rank-name">JOUEUR</span></div>
+            <div id="badge-container">
+                <span id="rank-badge" class="badge badge-sheep" style="margin-left:0;">🐑 BREBIS</span>
+            </div>
+            
             <div class="money" id="wallet-display">0 $</div>
         </div>
 
@@ -151,21 +155,47 @@
 
     </div>
 
-    <div class="version">V1.2 ELITE EDITION • STUDIO CODE</div>
+    <div class="version">V1.3 PRESTIGE EDITION • STUDIO CODE</div>
 
     <script>
-        // Récupère l'argent réel
+        // 1. GESTION DE L'ARGENT (Formatage propre)
         const money = parseInt(localStorage.getItem('topdog_wallet')) || 0;
+        let displayMoney = money;
         
-        // Formatte l'argent (ex: 7 904 954 000 $)
-        document.getElementById('wallet-display').innerText = new Intl.NumberFormat('fr-FR').format(money) + " $";
+        // On utilise le format court (1G, 10M) pour que ça rentre bien dans la barre
+        if (money >= 1000000000) displayMoney = (money / 1000000000).toFixed(1).replace(/\.0$/, '') + ' G';
+        else if (money >= 1000000) displayMoney = (money / 1000000).toFixed(1).replace(/\.0$/, '') + ' M';
+        else displayMoney = new Intl.NumberFormat('fr-FR').format(money);
 
-        // Détermine le rang (juste visuel pour le fun)
-        const rankEl = document.getElementById('rank-name');
-        if (money > 1000000000) { rankEl.innerText = "EMPEREUR"; rankEl.style.color = "#00f3ff"; }
-        else if (money > 1000000) { rankEl.innerText = "WHALE"; rankEl.style.color = "#f1c40f"; }
-        else if (money > 10000) { rankEl.innerText = "SHARK"; rankEl.style.color = "#2ecc71"; }
-        else { rankEl.innerText = "ROOKIE"; rankEl.style.color = "#888"; }
+        document.getElementById('wallet-display').innerText = displayMoney + " $";
+
+        // 2. GESTION DU BADGE (Nouvelle Logique Unifiée)
+        // On lit l'inventaire au lieu de calculer selon l'argent
+        const badgeEl = document.getElementById('rank-badge');
+        const inventory = JSON.parse(localStorage.getItem('topdog_inventory_badge') || '[]');
+        
+        // Hiérarchie des badges (du plus fort au plus faible)
+        if (inventory.includes('badge_goat')) {
+            badgeEl.className = 'badge badge-goat';
+            badgeEl.innerHTML = '🐐 G.O.A.T.';
+        } else if (inventory.includes('badge_legend')) {
+            badgeEl.className = 'badge badge-legend';
+            badgeEl.innerHTML = '💎 LEGEND';
+        } else if (inventory.includes('badge_apex')) {
+            badgeEl.className = 'badge badge-apex';
+            badgeEl.innerHTML = '👑 APEX';
+        } else if (inventory.includes('badge_alpha')) {
+            badgeEl.className = 'badge badge-alpha';
+            badgeEl.innerHTML = '🐺 ALPHA';
+        } else {
+            // Statut par défaut si rien acheté
+            badgeEl.className = 'badge badge-sheep';
+            badgeEl.innerHTML = '🐑 BREBIS';
+        }
+        
+        // On force le style pour l'accueil (taille et marge)
+        badgeEl.style.fontSize = "12px"; 
+        badgeEl.style.marginLeft = "0"; 
 
         // Audio Unlock
         document.addEventListener('click', function() {
