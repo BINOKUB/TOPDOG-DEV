@@ -86,4 +86,41 @@ const CATALOG = {
             emoji: '🤖' 
         }
     ]
+
+// NOUVELLE SECTION BADGES
+    badges: [
+        { 
+            id: 'badge_alpha', 
+            name: 'Statut ALPHA', 
+            price: 1000000000, 
+            desc: "Quittez le troupeau. Devenez le chef.",
+            class: 'badge-alpha',
+            icon: '🐺'
+        },
+        { 
+            id: 'badge_apex', 
+            name: 'Statut APEX', 
+            price: 10000000000, 
+            desc: "Le sommet de la chaîne alimentaire.",
+            class: 'badge-apex',
+            icon: '👑'
+        },
+        { 
+            id: 'badge_legend', 
+            name: 'Statut LEGEND', 
+            price: 100000000000, 
+            desc: "Votre nom brillera pour l'éternité.",
+            class: 'badge-legend',
+            icon: '💎'
+        },
+        { 
+            id: 'badge_goat', 
+            name: 'Statut G.O.A.T.', 
+            price: 500000000000, 
+            desc: "Greatest Of All Time. L'ultime rang.",
+            class: 'badge-goat',
+            icon: '🐐'
+        }
+    ]
+   
 };
