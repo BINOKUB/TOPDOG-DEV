@@ -115,90 +115,129 @@
 
     <a href="index.html" class="back-btn">RETOUR ACCUEIL</a>
 
-    <script src="catalog.js?v=2"></script>
-
+   <script src="catalog.js?v=FINAL"></script>
     <script>
-        const wallet = parseInt(localStorage.getItem('topdog_wallet')) || 0;
-        let inventory = JSON.parse(localStorage.getItem('topdog_inventory')) || ['bg_default', 'dog_default'];
-        
-        let activeBg = localStorage.getItem('topdog_active_bg') || 'bg_default';
-        let activeDog = localStorage.getItem('topdog_active_dog') || 'dog_default';
+        // 1. Initialisation
+        const walletEl = document.getElementById('wallet-amount');
+        const gridEl = document.getElementById('store-grid');
 
-        document.getElementById('wallet-display').innerText = new Intl.NumberFormat('fr-FR').format(wallet) + " $";
+        // On charge l'argent
+        function getWallet() {
+            return parseInt(localStorage.getItem('topdog_wallet')) || 0;
+        }
 
+        // On charge les inventaires
+        function getInventory(type) {
+            return JSON.parse(localStorage.getItem('topdog_inventory_' + type) || '[]');
+        }
+
+        // 2. Affichage
         function renderStore() {
-            const skinContainer = document.getElementById('skin-grid');
-            const dogContainer = document.getElementById('dog-grid');
-            skinContainer.innerHTML = '';
-            dogContainer.innerHTML = '';
+            // Affiche l'argent
+            const money = getWallet();
+            // Formattage propre (1G, 100M...)
+            let displayMoney = money;
+            if (money >= 1000000000) displayMoney = (money / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G';
+            else if (money >= 1000000) displayMoney = (money / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            else if (money >= 1000) displayMoney = (money / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+            
+            walletEl.innerText = displayMoney + " $";
 
-            if(typeof CATALOG !== 'undefined') {
-                CATALOG.skins.forEach(item => createCard(item, skinContainer, activeBg, 'bg'));
-                CATALOG.dogs.forEach(item => createCard(item, dogContainer, activeDog, 'dog'));
-            }
+            gridEl.innerHTML = '';
+
+            // On fusionne tout (Skins + Chiens) pour l'affichage
+            const allItems = [
+                ...CATALOG.skins.map(i => ({...i, type: 'skin'})),
+                ...CATALOG.dogs.map(i => ({...i, type: 'dog'}))
+            ];
+
+            // On filtre les items par défaut (prix 0) car on les a déjà
+            const shopItems = allItems.filter(i => i.price > 0);
+
+            shopItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                
+                // On vérifie si on le possède déjà
+                const inventory = getInventory(item.type);
+                const isOwned = inventory.includes(item.id);
+                
+                // On vérifie si c'est celui équipé actuellement
+                const activeId = localStorage.getItem('topdog_active_' + (item.type === 'skin' ? 'bg' : 'dog'));
+                const isEquipped = activeId === item.id;
+
+                // Visuel de l'item (Couleur ou Emoji)
+                let visual = '';
+                if(item.type === 'skin') {
+                    visual = `<div class="item-preview" style="background:${item.color}; border-radius:50%;"></div>`;
+                } else {
+                    visual = `<div class="item-preview" style="background:transparent; font-size:40px;">${item.emoji}</div>`;
+                }
+
+                // Bouton (Logique différente selon état)
+                let btnHtml = '';
+                if (isEquipped) {
+                    btnHtml = `<button class="btn-action btn-equipped" disabled>ÉQUIPÉ</button>`;
+                } else if (isOwned) {
+                    btnHtml = `<button class="btn-action btn-owned" onclick="equipItem('${item.type}', '${item.id}')">ÉQUIPER</button>`;
+                } else {
+                    // Vérif argent pour couleur bouton
+                    const canBuy = money >= item.price;
+                    const btnClass = canBuy ? 'btn-buy' : 'btn-locked';
+                    // Formattage prix bouton
+                    let priceText = item.price >= 1000000 ? (item.price/1000000) + 'M' : item.price;
+                    if(item.price >= 1000000000) priceText = (item.price/1000000000) + 'G';
+                    
+                    btnHtml = `<button class="btn-action ${btnClass}" onclick="buyItem('${item.type}', '${item.id}')">ACHETER ${priceText} $</button>`;
+                }
+
+                card.innerHTML = `
+                    ${visual}
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-desc">${item.desc}</div>
+                    ${btnHtml}
+                `;
+                gridEl.appendChild(card);
+            });
         }
 
-        function createCard(item, container, currentActive, type) {
-            const el = document.createElement('div');
-            el.className = 'item-card';
-            
-            const isOwned = inventory.includes(item.id);
-            const isActive = currentActive === item.id;
-            const canBuy = wallet >= item.price;
+        // 3. ACHAT INSTANTANÉ (Sans confirmation)
+        window.buyItem = function(type, id) {
+            const list = type === 'skin' ? CATALOG.skins : CATALOG.dogs;
+            const item = list.find(i => i.id === id);
+            const currentMoney = getWallet();
 
-            let previewStyle = type === 'bg' ? `background: ${item.color};` : `background: #222; color: #fff;`;
-            let content = type === 'dog' ? item.emoji : '';
+            if (currentMoney >= item.price) {
+                // A. PAIEMENT
+                localStorage.setItem('topdog_wallet', currentMoney - item.price);
 
-            let btnText, btnClass, action;
+                // B. LIVRAISON
+                let inventory = getInventory(type);
+                inventory.push(id);
+                localStorage.setItem('topdog_inventory_' + type, JSON.stringify(inventory));
 
-            if (isActive) {
-                btnText = "ACTIF"; btnClass = "btn-action active"; action = null;
-            } else if (isOwned) {
-                btnText = "ÉQUIPER"; btnClass = "btn-action owned";
-                action = () => equipItem(item.id, type);
-            } else if (canBuy) {
-                btnText = `ACHETER ${formatPrice(item.price)}`; btnClass = "btn-action";
-                action = () => buyItem(item, type);
+                // C. UPDATE UI INSTANTANÉ
+                renderStore(); 
+                
+                // Petit retour visuel (Optionnel, juste pour dire que ça a marché)
+                // On pourrait faire vibrer le téléphone ici si on voulait
+                
             } else {
-                btnText = `ACHETER ${formatPrice(item.price)}`; btnClass = "btn-action locked"; action = null;
+                alert("Fonds insuffisants ! Continue à jouer !");
             }
+        };
 
-            el.innerHTML = `
-                <div class="item-preview" style="${previewStyle}">${content}</div>
-                <div class="item-name">${item.name}</div>
-                <div class="item-desc">${item.desc || ''}</div>
-                ${!isOwned ? `<div class="item-price">${formatPrice(item.price)}</div>` : ''}
-            `;
+        // 4. ÉQUIPEMENT
+        window.equipItem = function(type, id) {
+            if (type === 'skin') {
+                localStorage.setItem('topdog_active_bg', id);
+            } else {
+                localStorage.setItem('topdog_active_dog', id);
+            }
+            renderStore(); // Met à jour les boutons
+        };
 
-            const btn = document.createElement('button');
-            btn.className = btnClass;
-            btn.innerText = btnText;
-            if (action) btn.onclick = action;
-            
-            el.appendChild(btn);
-            container.appendChild(el);
-        }
-
-        function buyItem(item, type) {
-            if (!confirm(`Acheter ${item.name} pour ${formatPrice(item.price)} ?`)) return;
-            localStorage.setItem('topdog_wallet', wallet - item.price);
-            inventory.push(item.id);
-            localStorage.setItem('topdog_inventory', JSON.stringify(inventory));
-            equipItem(item.id, type);
-        }
-
-        function equipItem(id, type) {
-            if (type === 'bg') localStorage.setItem('topdog_active_bg', id);
-            else localStorage.setItem('topdog_active_dog', id);
-            location.reload();
-        }
-
-        function formatPrice(num) {
-            if (num >= 1000000000) return (num / 1000000000).toFixed(0) + 'G';
-            if (num >= 1000000) return (num / 1000000).toFixed(0) + 'M';
-            return num + ' $';
-        }
-
+        // Lancement
         renderStore();
     </script>
 </body>
