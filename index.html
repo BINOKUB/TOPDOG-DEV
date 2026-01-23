@@ -3,105 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOPDOG - Accueil</title>
+    <title>TOPDOG - L'Élite</title>
     
     <link rel="stylesheet" href="style.css?v=FINAL">
     
     <style>
         body {
+            background-color: #000;
+            background-image: radial-gradient(circle at 50% 30%, #1a1a1a 0%, #000 70%);
             display: flex; flex-direction: column; 
             align-items: center; justify-content: center;
-            background: radial-gradient(circle at center, #1a1a1a, #000);
-            height: 100vh; overflow: hidden;
-            margin: 0; padding: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh; margin: 0; font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
-        .logo-container {
-            margin-bottom: 50px;
-            text-align: center;
-            animation: float 6s ease-in-out infinite;
-        }
-
+        /* --- TITRE --- */
         .main-title {
-            font-size: 4em; font-weight: 900; font-style: italic;
-            background: linear-gradient(45deg, #fff, #888);
+            font-size: 3.5em; font-weight: 900; font-style: italic;
+            color: #ccc; margin: 0; line-height: 1;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            background: linear-gradient(180deg, #fff 0%, #666 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: 5px; margin: 0;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
         .subtitle {
-            font-family: monospace; color: #2ecc71; 
-            font-size: 1.2em; letter-spacing: 2px;
-            margin-top: 10px;
+            color: #00f3ff; font-weight: bold; letter-spacing: 3px;
+            font-size: 0.9em; text-transform: uppercase;
+            margin-bottom: 30px; text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
         }
 
-        /* LES GROS BOUTONS DU MENU */
-        .menu-btn {
-            display: block; width: 280px; text-decoration: none;
-            text-align: center; padding: 20px 0; margin: 15px 0;
-            border-radius: 50px; font-weight: 900; font-size: 1.5em;
-            text-transform: uppercase; letter-spacing: 2px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative; overflow: hidden;
+        /* --- CARTE PRINCIPALE --- */
+        .vip-card {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%; max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        /* Bouton JOUER (Orange/Gold - Action Principale) */
+        /* --- BARRE DE STATUT (EMPEREUR) --- */
+        .status-bar {
+            background: #111; border-radius: 10px;
+            padding: 10px 15px; margin-bottom: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #222; font-family: monospace;
+        }
+        .rank { color: #00f3ff; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .money { color: #2ecc71; font-weight: bold; letter-spacing: 1px; }
+
+        /* --- VISUEL RÈGLE D'OR --- */
+        .rule-title { color: #00f3ff; font-size: 0.8em; margin-bottom: 10px; letter-spacing: 1px; }
+        .math-visual {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-bottom: 20px; font-size: 1.5em; font-weight: bold; color: #fff;
+        }
+        .box {
+            width: 40px; height: 40px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #333; background: #151515;
+        }
+        .box.pink { color: #ff00ff; border-color: #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.2); }
+        .box.green { color: #2ecc71; border-color: #2ecc71; box-shadow: 0 0 10px rgba(46,204,113,0.2); }
+        .divider { width: 50%; height: 1px; background: #333; margin: 20px auto; }
+
+        /* --- DESCRIPTION --- */
+        .desc-text { color: #888; font-size: 0.9em; line-height: 1.4; margin-bottom: 20px; }
+        .tags { color: #fff; font-weight: bold; font-size: 0.9em; margin-bottom: 30px; }
+
+        /* --- BOUTONS --- */
+        .btn {
+            display: block; width: 100%; padding: 15px 0;
+            border-radius: 50px; text-decoration: none;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 15px; transition: transform 0.1s; cursor: pointer;
+        }
+        .btn:active { transform: scale(0.98); }
+
+        /* 1. LANCER (Orange) */
         .btn-play {
-            background: linear-gradient(90deg, #e67e22, #d35400);
-            color: #fff;
-            box-shadow: 0 10px 30px rgba(230, 126, 34, 0.4);
-            border: 2px solid #e67e22;
+            background: linear-gradient(180deg, #e67e22, #d35400);
+            color: #fff; border: none;
+            box-shadow: 0 5px 20px rgba(230, 126, 34, 0.3);
+            font-size: 1.2em;
         }
-        .btn-play:active { transform: scale(0.95); }
 
-        /* Bouton DÉMO (Bleu Néon - Action Secondaire) */
+        /* 2. DÉMO (Nouveau - Style Néon Bleu) */
         .btn-demo {
             background: transparent;
+            border: 2px solid #00f3ff;
             color: #00f3ff;
-            border: 3px solid #00f3ff;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
-            font-size: 1.2em; /* Un peu plus petit */
+            font-size: 1em;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
         }
-        .btn-demo:active { transform: scale(0.95); background: rgba(0, 243, 255, 0.1); }
+        .btn-demo:hover { background: rgba(0, 243, 255, 0.1); }
 
-        /* Animation flottante pour le logo */
-        @keyframes float { 
-            0% { transform: translateY(0px); } 
-            50% { transform: translateY(-20px); } 
-            100% { transform: translateY(0px); } 
+        /* 3. BOUTIQUE (Style Outline Cyan/Gris) */
+        .btn-shop {
+            background: transparent;
+            border: 1px solid #00f3ff;
+            color: #00f3ff;
+            font-size: 0.9em;
+            opacity: 0.8;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
 
-        /* Version Mobile */
-        @media (max-width: 600px) {
-            .main-title { font-size: 3em; }
-            .menu-btn { width: 80%; }
+        .version {
+            position: absolute; bottom: 10px; width: 100%; text-align: center;
+            color: #333; font-size: 0.6em; font-family: monospace;
         }
     </style>
 </head>
 <body>
 
-    <div class="logo-container">
-        <h1 class="main-title">TOPDOG</h1>
-        <div class="subtitle">CASINO EDITION</div>
+    <h1 class="main-title">TOPDOG</h1>
+    <div class="subtitle">L'ÉLITE DU PARI STRATÉGIQUE</div>
+
+    <div class="vip-card">
+        
+        <div class="status-bar">
+            <div class="rank">💎 <span id="rank-name">JOUEUR</span></div>
+            <div class="money" id="wallet-display">0 $</div>
+        </div>
+
+        <div class="rule-title">LA RÈGLE D'OR</div>
+        
+        <div class="math-visual">
+            <div class="box pink">4</div>
+            <span>+</span>
+            <div class="box green">5</div>
+            <span>=</span>
+            <span>9</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="desc-text">
+            Plongez dans l'arène. Misez sur vos chiens favoris et frayez-leur un chemin.
+        </div>
+        <div class="tags">Rapidité • Stratégie • Cash Out</div>
+
+        <a href="topdog.html" class="btn btn-play">LANCER LE JEU</a>
+        
+        <a href="demo.html" class="btn btn-demo">🎓 VOIR LA DÉMO</a>
+
+        <a href="store.html" class="btn btn-shop">🛍️ ACCÉDER À LA BOUTIQUE</a>
+
     </div>
 
-    <a href="topdog.html" class="menu-btn btn-play">
-        JOUER 🎲
-    </a>
-
-    <a href="demo.html" class="menu-btn btn-demo">
-        DÉMO 🎓
-    </a>
-    
-    <div style="margin-top: 30px;">
-        <a href="store.html" style="color:#666; text-decoration:none; font-size:0.9em; border-bottom:1px dotted #666;">
-            Accès Boutique VIP
-        </a>
-    </div>
+    <div class="version">V1.2 ELITE EDITION • STUDIO CODE</div>
 
     <script>
+        // Récupère l'argent réel
+        const money = parseInt(localStorage.getItem('topdog_wallet')) || 0;
+        
+        // Formatte l'argent (ex: 7 904 954 000 $)
+        document.getElementById('wallet-display').innerText = new Intl.NumberFormat('fr-FR').format(money) + " $";
+
+        // Détermine le rang (juste visuel pour le fun)
+        const rankEl = document.getElementById('rank-name');
+        if (money > 1000000000) { rankEl.innerText = "EMPEREUR"; rankEl.style.color = "#00f3ff"; }
+        else if (money > 1000000) { rankEl.innerText = "WHALE"; rankEl.style.color = "#f1c40f"; }
+        else if (money > 10000) { rankEl.innerText = "SHARK"; rankEl.style.color = "#2ecc71"; }
+        else { rankEl.innerText = "ROOKIE"; rankEl.style.color = "#888"; }
+
+        // Audio Unlock
         document.addEventListener('click', function() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (AudioContext) {
