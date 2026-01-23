@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TOPDOG - Démo</title>
+    <link rel="stylesheet" href="style.css?v=FINAL">
+    <link rel="stylesheet" href="skin-neon.css"> <style>
+        /* OVERRIDES SPÉCIFIQUES À LA DÉMO */
+        body {
+            background: #000;
+            justify-content: center; /* Centre tout */
+        }
+        
+        /* On cache tout ce qui n'est pas la grille */
+        .top-bar, .hud, .controls, #betting-board { display: none; }
+
+        /* Titre Démo */
+        .demo-title {
+            position: absolute; top: 10%;
+            font-size: 2em; color: #fff; font-weight: 900;
+            text-shadow: 0 0 15px #00f3ff;
+            text-transform: uppercase; letter-spacing: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        /* La grille démo */
+        #game-grid {
+            pointer-events: none; /* Le joueur ne peut pas cliquer, c'est un film */
+            border-color: #00f3ff;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
+        }
+
+        /* La Main Fantôme (Curseur) */
+        #ghost-hand {
+            position: absolute; width: 40px; height: 40px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="2"><path d="M9 20l-5-5 5-5v3.5a8.5 8.5 0 1 1 8.5 8.5h-3.5"/></svg>'); /* Simplifié */
+            font-size: 40px;
+            text-shadow: 2px 2px 0 #000;
+            z-index: 999;
+            transition: all 0.5s ease-in-out;
+            pointer-events: none;
+            display: none; /* Caché au début */
+        }
+        #ghost-hand::after {
+            content: '👆';
+        }
+
+        /* Bulle d'explication Math */
+        .math-bubble {
+            position: absolute;
+            background: #fff; color: #000;
+            padding: 10px 20px; border-radius: 20px;
+            font-weight: bold; font-size: 1.5em;
+            box-shadow: 0 0 20px #fff;
+            opacity: 0; transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        /* Bouton Retour */
+        .btn-close-demo {
+            position: absolute; bottom: 10%;
+            background: transparent; border: 2px solid #fff; color: #fff;
+            padding: 15px 40px; border-radius: 50px;
+            font-size: 1.2em; cursor: pointer;
+            text-decoration: none; font-weight: bold;
+        }
+        .btn-close-demo:hover { background: #fff; color: #000; }
+
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; text-shadow: 0 0 30px #00f3ff; } 100% { opacity: 0.8; } }
+    </style>
+</head>
+<body>
+
+    <div class="demo-title">COMMENT JOUER</div>
+
+    <div class="game-container">
+        <div id="game-grid"></div>
+        <div id="ghost-hand"></div>
+        <div id="math-display" class="math-bubble"></div>
+    </div>
+
+    <a href="topdog.html" class="btn-close-demo">J'AI COMPRIS</a>
+
+    <script>
+        const gridEl = document.getElementById('game-grid');
+        const hand = document.getElementById('ghost-hand');
+        const bubble = document.getElementById('math-display');
+
+        // SCÉNARIO PRÉ-ÉCRIT
+        // Une colonne simple pour la démo (Colonne 3)
+        // 0 = vide, 9 = chien
+        let demoState = [
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,9,0,0,0,0], // Le Chien est là (Ligne 2)
+            [0,0,0,4,0,0,0,0], // Chiffre 4
+            [0,0,0,5,0,0,0,0], // Chiffre 5 (Match !)
+            [0,0,0,2,0,0,0,0], // Décor
+            [0,0,0,7,0,0,0,0], // Décor
+            [0,0,0,0,0,0,0,0]  // Arrivée
+        ];
+
+        function renderDemo() {
+            gridEl.innerHTML = '';
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    let val = demoState[r][c];
+                    let tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.dataset.r = r; tile.dataset.c = c;
+                    
+                    if(val === 9) {
+                        tile.classList.add('nine'); // Le CSS fera le reste (cadre)
+                        tile.innerText = '🐕'; // Emoji direct pour la démo
+                        tile.style.fontSize = '40px';
+                        tile.style.background = '#000';
+                    } else if (val > 0) {
+                        tile.innerText = val;
+                        tile.classList.add('val-'+val);
+                    } else {
+                        tile.classList.add('empty');
+                    }
+                    gridEl.appendChild(tile);
+                }
+            }
+        }
+
+        // --- MOTEUR D'ANIMATION (TIMELINE) ---
+        async function playScenario() {
+            await wait(1000);
+
+            // ÉTAPE 1 : La main arrive sur le 4
+            await moveHandTo(3, 3);
+            highlight(3, 3);
+            await wait(500);
+
+            // ÉTAPE 2 : La main va sur le 5
+            await moveHandTo(4, 3);
+            highlight(4, 3);
+            await wait(500);
+
+            // ÉTAPE 3 : EXPLICATION
+            showBubble("4 + 5 = 9 !");
+            await wait(1500);
+            hideBubble();
+
+            // ÉTAPE 4 : MATCH
+            hand.style.display = 'none';
+            // Animation CSS
+            document.querySelector('.tile[data-r="3"][data-c="3"]').style.transform = 'scale(0)';
+            document.querySelector('.tile[data-r="4"][data-c="3"]').style.transform = 'scale(0)';
+            await wait(300);
+
+            // ÉTAPE 5 : GRAVITÉ (Mise à jour des données)
+            demoState[3][3] = 9; // Le chien descend
+            demoState[2][3] = 0; // L'ancienne place du chien est vide
+            demoState[4][3] = 0; // Le 5 disparait
+            renderDemo();
+            
+            // Son de victoire simulé (visuel)
+            showBubble("LE CHIEN DESCEND !");
+            await wait(2000);
+            hideBubble();
+
+            // BOUCLE : On recommence pour bien montrer
+            // Reset state
+            demoState = [
+                [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0], [0,0,0,9,0,0,0,0],
+                [0,0,0,4,0,0,0,0], [0,0,0,5,0,0,0,0], [0,0,0,2,0,0,0,0],
+                [0,0,0,7,0,0,0,0], [0,0,0,0,0,0,0,0]
+            ];
+            renderDemo();
+            playScenario(); // Boucle infinie
+        }
+
+        // --- OUTILS ---
+        function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        function moveHandTo(r, c) {
+            return new Promise(resolve => {
+                hand.style.display = 'block';
+                const tile = document.querySelector(`.tile[data-r="${r}"][data-c="${c}"]`);
+                const rect = tile.getBoundingClientRect();
+                // On positionne la main au centre de la case
+                hand.style.left = (rect.left + rect.width/2 - 20) + 'px';
+                hand.style.top = (rect.top + rect.height/2 - 10) + 'px';
+                
+                // Effet de clic
+                hand.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    hand.style.transform = 'scale(1)';
+                    resolve();
+                }, 500);
+            });
+        }
+
+        function highlight(r, c) {
+            const tile = document.querySelector(`.tile[data-r="${r}"][data-c="${c}"]`);
+            tile.classList.add('selected');
+        }
+
+        function showBubble(text) {
+            const gridRect = gridEl.getBoundingClientRect();
+            bubble.innerText = text;
+            bubble.style.top = (gridRect.top + gridRect.height / 2 - 20) + 'px';
+            bubble.style.left = (gridRect.left + 20) + 'px';
+            bubble.style.opacity = 1;
+        }
+        function hideBubble() { bubble.style.opacity = 0; }
+
+        // Lancement
+        window.onload = () => {
+            renderDemo();
+            playScenario();
+        };
+    </script>
+</body>
+</html>
