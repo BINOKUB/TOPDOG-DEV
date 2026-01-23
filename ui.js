@@ -1,6 +1,6 @@
 /* =========================================
-   TOPDOG UI ENGINE V26
-   FEATURES: STORE READY & WALLET SYNC
+   TOPDOG UI ENGINE V27
+   FEATURES: AUTO-PAYOUT & CLEAN UI
    ========================================= */
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -14,7 +14,8 @@ let isMuted = localStorage.getItem('topdog_muted') === 'true';
 
 /* --- FORMATTER D'ARGENT --- */
 function formatMoney(num) {
-    if (!num) return "0"; // Sécurité si undefined
+    if (!num) return "0"; 
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G'; // Ajout des Milliards (G)
     if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
     return num;
@@ -69,13 +70,6 @@ const SoundFX = {
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, t); osc.frequency.linearRampToValueAtTime(50, t + 1);
         gain.gain.setValueAtTime(0.2, t); gain.gain.linearRampToValueAtTime(0, t + 1);
         osc.start(t); osc.stop(t + 1);
-    },
-    cashout: () => {
-        if(isMuted) return;
-        resumeAudio();
-        const t = audioCtx.currentTime;
-        playNote(1200, 'square', 0.1, t);
-        playNote(1600, 'square', 0.3, t + 0.1);
     }
 };
 
@@ -127,30 +121,26 @@ document.getElementById('btn-shuffle').onclick = () => {
     }
 };
 
-/* --- FONCTION DE DÉMARRAGE ET DE RESET BLINDÉE --- */
+/* --- FONCTION DE DÉMARRAGE BLINDÉE --- */
 function startGame() {
     console.log("🔄 REDÉMARRAGE DU JEU...");
 
-    // 1. ON VA CHERCHER L'ARGENT SUR LE DISQUE (LA VRAIE VALEUR)
+    // 1. ON VA CHERCHER L'ARGENT SUR LE DISQUE
     let disqueArgent = localStorage.getItem('topdog_wallet');
     let vraieArgent = disqueArgent ? parseInt(disqueArgent) : 0;
-    
-    console.log("💰 Argent sur le disque (Index) : " + vraieArgent);
     
     // 2. ON LANCE LE MOTEUR
     initGameEngine();
     
     // 3. ON FORCE LE MOTEUR À PRENDRE LA VRAIE VALEUR
-    // (Même si le moteur veut mettre 750k, on lui dit NON, tu mets 795k)
     if(typeof gameState !== 'undefined') {
         gameState.bankroll = vraieArgent;
-        console.log("✅ Argent forcé dans le jeu : " + gameState.bankroll);
     }
 
-    // 4. ON MET À JOUR L'AFFICHAGE TOUT DE SUITE
+    // 4. ON MET À JOUR L'AFFICHAGE
     updateHUD(); 
 
-    // 5. LE RESTE DU DÉMARRAGE CLASSIQUE
+    // 5. LE RESTE DU DÉMARRAGE
     renderBettingBoard();
     renderGrid();
     startTimer();
@@ -165,30 +155,6 @@ function startGame() {
     
     isProcessing = false; 
     selectedTile = null;
-}
-/* --- LE CASH OUT (SYNC AVEC LOGIC.JS) --- */
-function cashOut() {
-    let oldAmount = gameState.bankroll;
-    if (oldAmount <= 0) return;
-
-    SoundFX.cashout();
-    
-    // Reset Banque (Utilise saveWallet de logic.js)
-    gameState.bankroll = 0;
-    if(typeof saveWallet === 'function') {
-        saveWallet(0); 
-    } else {
-        localStorage.setItem('topdog_wallet', 0); // Fallback
-    }
-    
-    updateHUD();
-
-    showMessage(
-        "ENCAISSÉ !",
-        `<div style="color:#f1c40f; font-size:1.2em; margin-bottom:10px;">Vous avez sécurisé</div>
-         <h1 style="color:#fff; font-size:3em; margin:0;">$${formatMoney(oldAmount)}</h1>
-         <div style="color:#ccc; font-size:0.9em; margin-top:15px;">La banque est remise à zéro.<br>Prêt pour un nouveau départ ?</div>`
-    );
 }
 
 function renderBettingBoard() {
@@ -210,7 +176,6 @@ function updateHUD() {
     const scoreEl = document.getElementById('score-display');
     if(scoreEl) {
         scoreEl.innerText = formatMoney(gameState.bankroll);
-        // Petit effet visuel si l'argent change
         scoreEl.style.transition = "color 0.3s";
         scoreEl.style.color = "#fff";
     }
@@ -322,14 +287,13 @@ function handleWin(dogId) {
     let dog = gameState.dogs.find(d => d.id === dogId);
     
     // CALCUL DU GAIN TOTAL (10x la mise)
-    // NOTE: logic.js a déjà ajouté 1x la mise.
-    // On ajoute ici le BONUS de 9x pour atteindre le Jackpot de 10x.
+    // Le gain est automatiquement ajouté à la bankroll
     let bonusAmount = dog.bet * 9; 
     let totalWin = dog.bet * 10;
 
     gameState.bankroll += bonusAmount;
     
-    // Sauvegarde sécurisée
+    // SAUVEGARDE AUTOMATIQUE
     if(typeof saveWallet === 'function') {
         saveWallet(gameState.bankroll);
     } else {
@@ -340,6 +304,7 @@ function handleWin(dogId) {
     
     document.getElementById(`bet-dog-${dogId}`).classList.add('winner');
     
+    // AFFICHER LE MESSAGE (Sans bouton Encaisser)
     showMessage(
         "VICTOIRE !", 
         `<div style="font-size:1.5em; color:#fff; margin-bottom:5px;">${dog.name}</div>
@@ -349,7 +314,7 @@ function handleWin(dogId) {
     );
 }
 
-/* --- SYSTÈME D'INDICE STRATÉGIQUE --- */
+/* --- SYSTÈME D'INDICE --- */
 function showHint() {
     let dogCols = [];
     let dogsPositions = [];
@@ -421,26 +386,21 @@ function showHint() {
     }
 }
 
-/* --- LE MESSAGE BOX DYNAMIQUE --- */
+/* --- LE MESSAGE BOX CLEAN (SANS ENCAISSER) --- */
 function showMessage(title, content) {
     const overlay = document.getElementById('message-overlay');
     overlay.style.display = 'flex';
     
-    let buttonsHtml = `<button onclick="startGame()" style="margin-top:20px; background:#2ecc71; color:#000; font-size:1.2em; padding:15px 30px; border:none; border-radius:50px; font-weight:bold; cursor:pointer;">CONTINUER</button>`;
+    // ON A RETIRÉ LA LOGIQUE "ENCAISSER" ICI
+    // Il ne reste que le bouton REJOUER (qui relance startGame)
+    let buttonsHtml = `
+        <button onclick="startGame()" style="margin-top:20px; background:#2ecc71; color:#000; font-size:1.2em; padding:15px 30px; border:none; border-radius:50px; font-weight:bold; cursor:pointer; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);">
+            REJOUER
+        </button>`;
     
-    if (gameState.bankroll > 0 && title !== "ENCAISSÉ !") {
-        buttonsHtml += `
-            <div style="margin-top:15px;">
-                <button onclick="cashOut()" style="background:transparent; border:2px solid #e74c3c; color:#e74c3c; font-size:0.9em; padding:10px 20px; border-radius:50px; font-weight:bold; cursor:pointer; opacity:0.8;">
-                    ENCAISSER $${formatMoney(gameState.bankroll)}
-                </button>
-            </div>
-        `;
-    }
-
     overlay.innerHTML = `
-        <h2 style="color:#fff; letter-spacing:3px;">${title}</h2>
-        <div style="color:#ccc; line-height:1.5;">${content}</div>
+        <h2 style="color:#fff; letter-spacing:3px; margin-bottom:20px;">${title}</h2>
+        <div style="color:#ccc; line-height:1.5; font-size:1.2em;">${content}</div>
         ${buttonsHtml}
     `;
 }
@@ -462,4 +422,7 @@ function startTimer() {
     }, 1000);
 }
 
-startGame();
+// Initialise si le DOM est prêt
+if(document.readyState === 'complete') {
+    // startGame() est appelé par topdog.html via launchApp()
+}
