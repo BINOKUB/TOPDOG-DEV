@@ -61,42 +61,18 @@
 
         /* --- OPTIMISATION MOBILE --- */
         @media (max-width: 600px) {
-            body { 
-                padding: 10px; 
-            }
+            body { padding: 10px; }
             h1 { font-size: 1.8em; }
-            
-            .store-grid {
-                grid-template-columns: 1fr 1fr !important;
-                gap: 8px;
-            }
-            
-            .item-card {
-                padding: 10px; 
-            }
-            
-            .item-preview {
-                width: 50px; height: 50px; font-size: 24px; margin-bottom: 5px;
-            }
-            
+            .store-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+            .item-card { padding: 10px; }
+            .item-preview { width: 50px; height: 50px; font-size: 24px; margin-bottom: 5px; }
             .item-name { 
-                font-size: 0.8em; 
-                height: 2.2em; 
-                overflow: hidden;
+                font-size: 0.8em; height: 2.2em; overflow: hidden;
                 display: flex; align-items: center; justify-content: center;
             }
-            
-            .item-desc {
-                display: none; 
-            }
-            
-            .btn-action {
-                font-size: 0.8em; padding: 6px 0;
-            }
-            
-            .wallet-box {
-                font-size: 1.2em; padding: 8px 15px; margin-bottom: 20px;
-            }
+            .item-desc { display: none; }
+            .btn-action { font-size: 0.8em; padding: 6px 0; }
+            .wallet-box { font-size: 1.2em; padding: 8px 15px; margin-bottom: 20px; }
         }
     </style>
 </head>
@@ -117,7 +93,6 @@
     <script>
         // 1. Initialisation
         const walletEl = document.getElementById('wallet-amount');
-        // CORRECTION ICI : On cible les deux grilles séparément
         const skinGridEl = document.getElementById('skin-grid');
         const dogGridEl = document.getElementById('dog-grid');
 
@@ -142,33 +117,38 @@
             
             walletEl.innerText = displayMoney + " $";
 
-            // On vide les deux grilles avant de remplir
+            // On vide les grilles
             skinGridEl.innerHTML = '';
             dogGridEl.innerHTML = '';
 
-            // Fusion des catalogues avec le type
+            // Fusion des catalogues
             const allItems = [
                 ...CATALOG.skins.map(i => ({...i, type: 'skin'})),
                 ...CATALOG.dogs.map(i => ({...i, type: 'dog'}))
             ];
 
-            // On filtre les items par défaut (prix 0)
-            const shopItems = allItems.filter(i => i.price > 0);
-
-            shopItems.forEach(item => {
+            // CORRECTION: On affiche TOUT (plus de filtre de prix)
+            allItems.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 
                 const inventory = getInventory(item.type);
-                const isOwned = inventory.includes(item.id);
+                // CORRECTION: Si le prix est 0, on le possède d'office !
+                const isOwned = inventory.includes(item.id) || item.price === 0;
                 
-                const activeId = localStorage.getItem('topdog_active_' + (item.type === 'skin' ? 'bg' : 'dog'));
+                // On gère l'équipement par défaut si rien n'est sélectionné
+                let activeId = localStorage.getItem('topdog_active_' + (item.type === 'skin' ? 'bg' : 'dog'));
+                if (!activeId) {
+                    activeId = (item.type === 'skin') ? 'bg_default' : 'dog_default';
+                }
                 const isEquipped = activeId === item.id;
 
                 // Visuel
                 let visual = '';
                 if(item.type === 'skin') {
-                    visual = `<div class="item-preview" style="background:${item.color}; border-radius:50%;"></div>`;
+                    // Si c'est le default dark, on met du gris foncé, sinon la couleur
+                    let color = item.color; 
+                    visual = `<div class="item-preview" style="background:${color}; border-radius:50%;"></div>`;
                 } else {
                     visual = `<div class="item-preview" style="background:transparent; font-size:40px;">${item.emoji}</div>`;
                 }
@@ -176,7 +156,7 @@
                 // Bouton
                 let btnHtml = '';
                 if (isEquipped) {
-                    btnHtml = `<button class="btn-action btn-equipped" disabled>ÉQUIPÉ</button>`;
+                    btnHtml = `<button class="btn-action btn-equipped" disabled>ACTIF</button>`;
                 } else if (isOwned) {
                     btnHtml = `<button class="btn-action btn-owned" onclick="equipItem('${item.type}', '${item.id}')">ÉQUIPER</button>`;
                 } else {
@@ -195,7 +175,7 @@
                     ${btnHtml}
                 `;
                 
-                // CORRECTION : On met l'objet dans la bonne étagère
+                // Placement dans la bonne grille
                 if (item.type === 'skin') {
                     skinGridEl.appendChild(card);
                 } else {
@@ -204,23 +184,20 @@
             });
         }
 
-        // 3. ACHAT INSTANTANÉ
+        // 3. ACHAT
         window.buyItem = function(type, id) {
             const list = type === 'skin' ? CATALOG.skins : CATALOG.dogs;
             const item = list.find(i => i.id === id);
             const currentMoney = getWallet();
 
             if (currentMoney >= item.price) {
-                // Paiement
                 localStorage.setItem('topdog_wallet', currentMoney - item.price);
-                // Livraison
                 let inventory = getInventory(type);
                 inventory.push(id);
                 localStorage.setItem('topdog_inventory_' + type, JSON.stringify(inventory));
-                // Update
                 renderStore(); 
             } else {
-                alert("Fonds insuffisants ! Continue à jouer !");
+                alert("Pas assez d'argent !");
             }
         };
 
