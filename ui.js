@@ -1,5 +1,5 @@
 /* =========================================
-   TOPDOG UI ENGINE V27
+   TOPDOG UI ENGINE V27 VER 1.3
    FEATURES: AUTO-PAYOUT & CLEAN UI
    ========================================= */
 
